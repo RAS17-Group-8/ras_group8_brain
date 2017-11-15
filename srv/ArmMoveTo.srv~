@@ -1,0 +1,8 @@
+# Request
+geometry_msgs/Point position # Desired movement position
+
+---
+# Response
+geometry_msgs/Point position # actual arm position after execution of the request
+duration elapsed # ammount of time to execute request
+bool error # if true, an error has been detected and no movement was produced

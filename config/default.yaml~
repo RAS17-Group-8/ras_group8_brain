@@ -23,7 +23,4 @@ home:
     obstacle_x:0
     obstacle_y:10
     obstacle_z=-10
-    
-    position_x=0.15;
-    position_y=0.15;
 

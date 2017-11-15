@@ -52,7 +52,6 @@ add_executable(${PROJECT_NAME}
   src/ObstacleState.cpp
   src/PathExectuionState.cpp
   src/Speaker.cpp
-  src/HomeState.cpp
 )
 
 
