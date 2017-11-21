@@ -2,6 +2,7 @@
 
 // STD
 #include <string>
+#include <cmath>
 
 namespace ras_group8_brain {
 
@@ -9,59 +10,74 @@ namespace ras_group8_brain {
 
 bool  Brain::obstacleState()
 {
+    ROS_INFO("Obstacle State");
 
-    //see a new obstacle
-    actual_obstacle_.position.x=4;
-    actual_obstacle_.position.y=4;
-    actual_obstacle_.shape="cube";
-    actual_obstacle_.color="green";
-    actual_obstacle_.recovered=false;
+    //////////////////////////////////////Change message in global position////////////////
+    new_obstacle_global_.position.x=0.8;  //change to message
+    new_obstacle_global_.position.y=1.6;   //change to message
+    new_obstacle_global_.number=new_obstacle_msg_.number;
+    ///////////////////////////////////////////////////////////////////////////////////////
 
-    if(true) //valuable obstacle
+    if(new_obstacle_global_.number>0 && new_obstacle_global_.number<=14) //valuable obstacle
     {
-        if (!Brain::ValuableObstacle(&actual_obstacle_))
+        if (!Brain::ValuableObstacle(&new_obstacle_global_,&new_obstacle_msg_))
+        {
             return false;
+        }
+        state_=3;
     }
-    else if(false) //removable obstacle
+    else if (new_obstacle_global_.number==15) //Solide obstacle
     {
-        if (!Brain::RemovableObstacle(&actual_obstacle_))
+        if (!Brain::SolidObstacle(&new_obstacle_global_))
             return false;
+        if(round1_)
+        {
+           state_=1;
+        }
+        else
+        {
+           state_=2;
+        }
+
+    }
+    else if(new_obstacle_global_.number==16) //removable obstacle
+    {
+        if (!Brain::RemovableObstacle(&new_obstacle_global_))
+            return false;
+        state_=3;
     }
     else
     {
-        if (!Brain::SolidObstacle(&actual_obstacle_))
-            return false;
+        ROS_INFO("ObstacleState:No_Obstacle");
+        obstacle_=false;
+        state_=3;
+        return false;
     }
 
    return true;
 }
 
-bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle)
+bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, ras_group8_brain::Vision *obstacle_msg)
 {
     int list_element;
-    if(!Brain::defineObstacleValue(obstacle))
-        return false;
 
-    if(Brain::addObstacleToList(obstacle, &list_element))
+    if(Brain::addObstacleToList(obstacle_global, &list_element))
     {
+        pointVizualisation(obstacle_global->position);
         std_msgs::String obstacle_text;
-        obstacle_text.data="I see the "+obstacle->color+" "+obstacle->shape;
+        obstacle_text.data="I see the "+obstacle_global->text;
         Brain::Speak(obstacle_text);
         ROS_INFO("ObstacleState: %s ",obstacle_text.data.c_str());
     }
 
-    if(list_element==planned_element)
+    if(list_element==planned_element_)
     {
-        ///////tf
-        if(!pickUpArm(obstacle->position))
+        if(!pickUpArm(obstacle_msg->position.point))
             return false;
 
-        picked_up_element=planned_element;
-        planned_element=-1;
+        picked_up_element_=planned_element_;
+        planned_element_=-1;
     }
-
-
-
     return true;
 
 }
@@ -71,70 +87,33 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
 {
     for (int i=0; i<ObstacleList_.size();i++)
     {
-        double position_x=abs(ObstacleList_[i].position.x-obstacle->position.x);
-        double position_y=abs(ObstacleList_[i].position.y-obstacle->position.y);
+        double position_x=std::abs(ObstacleList_[i].position.x-obstacle->position.x);
+        double position_y=std::abs(ObstacleList_[i].position.y-obstacle->position.y);
 
-        if(position_x<obstacle_position_accurancy_&&position_y<obstacle_position_accurancy_&&
-           !ObstacleList_[i].shape.compare(obstacle->shape)&&!ObstacleList_[i].color.compare(obstacle->color))
+        if(position_x<obstacle_position_accurancy_&&position_y<obstacle_position_accurancy_
+           &&ObstacleList_[i].number==obstacle->number)
         {
             *list_element=i;
+            ObstacleList_[i].recovered=false;
+            ObstacleList_[i].try_counter=0;
             ROS_INFO("ObstacleState: Element Exists ");
             return false;
         }
     }
     *list_element=ObstacleList_.size();
+
+    obstacle->text=possible_obstacle_[obstacle->number].name;
+    obstacle->value=possible_obstacle_[obstacle->number].value;
+    obstacle->recovered=false;
+    obstacle->try_counter=0;
+
+
     ObstacleList_.push_back(*obstacle);
+    Brain::writeTextfile(obstacle);
+    pointVizualisation(obstacle->position);
     return true;
 }
 
-bool Brain::defineObstacleValue(struct Brain::Obstacle *obstacle)
-{
-    if(!obstacle->shape.compare("cube")&& !obstacle->color.compare("red"))
-      obstacle->value=value_group1_;
-
-    else if(!obstacle->shape.compare("hollow cube")&& !obstacle->color.compare("red"))
-      obstacle->value=value_group1_;
-
-    else if(!obstacle->shape.compare("cube")&& !obstacle->color.compare("blue"))
-      obstacle->value=value_group1_;
-
-    else if(!obstacle->shape.compare("cube")&& !obstacle->color.compare("green"))
-     obstacle->value=value_group2_;
-
-    else if(!obstacle->shape.compare("cube")&& !obstacle->color.compare("yellow"))
-     obstacle->value=value_group2_;
-
-    else if(!obstacle->shape.compare("ball")&& !obstacle->color.compare("yellow"))
-     obstacle->value=value_group2_;
-
-    else if(!obstacle->shape.compare("ball")&& !obstacle->color.compare("red"))
-     obstacle->value=value_group3_;
-
-    else if(!obstacle->shape.compare("cylinder")&& !obstacle->color.compare("green"))
-     obstacle->value=value_group3_;
-
-    else if(!obstacle->shape.compare("triangle")&& !obstacle->color.compare("blue"))
-     obstacle->value=value_group3_;
-
-    else if(!obstacle->shape.compare("cross")&& !obstacle->color.compare("purble"))
-     obstacle->value=value_group4_;
-
-    else if(!obstacle->shape.compare("star")&& !obstacle->color.compare("purple"))
-     obstacle->value=value_group4_;
-
-    else if(!obstacle->shape.compare("star")&& !obstacle->color.compare("orange"))
-     obstacle->value=value_group4_;
-
-    else
-    {
-        ROS_ERROR("ObstacleState: Obstacle not known");
-
-        obstacle->value=0;
-        return false;
-
-    }
-    return true;
-}
 
 bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
 {
@@ -159,7 +138,20 @@ bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
     return true;
 }
 
+void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
+{
+    if (msg.number!=0)
+    {
+        obstacle_=true;
+        new_obstacle_msg_=msg;
 
+        ROS_INFO("VisionMessage");
+    }
+    else
+    {
+        obstacle_=false;
+    }
+}
 
 
 } /* namespace */

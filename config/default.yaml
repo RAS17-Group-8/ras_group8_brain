@@ -8,22 +8,38 @@ move_arm_down_service: /ras_group8_arm/cartesian_up
 #Spearker
 speaker_topic: /espeak/string
 
+#PathExecution
+send_path_topic: /ras_group8_brain/send_path
+path_stop_topic: /ras_group8_brain/stop_driving
+path_done_topic: /ras_group8_navigation_system/path_done
+
+#ObstacleDetection
+vision_msg_topic: /ras_group8_vision_system/obstacle
+
+
 arm_up:
     pickup_attempt: 10
     pickup_range: 5
 
 obstacle:
     position_accurancy: 0.05
+    obstacle_try: 10
     value_group1: 100
     value_group2: 1000
     value_group3: 5000
     value_group4: 10000
 
 home:
-    obstacle_x:0
-    obstacle_y:10
-    obstacle_z=-10
+    obstacle_x: 0.0
+    obstacle_y: 0.1
+    obstacle_z: 0.05
     
-    position_x=0.15;
-    position_y=0.15;
+    position_x: 0.15
+    position_y: 0.15
+    orientation_z: 0.7
+    orientation_w: 0.7
+
+init:
+    first_round: false
+    obstacle_file: /home/ras/ObstacleFile.txt
 

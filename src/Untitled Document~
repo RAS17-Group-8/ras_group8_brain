@@ -1,0 +1,48 @@
+//bool Brain::defineObstacleValue(struct Brain::Obstacle *obstacle)
+//{
+//    if(!obstacle->shape.compare("cube")&& !obstacle->color.compare("red"))
+//      obstacle->value=value_group1_;
+
+//    else if(!obstacle->shape.compare("hollow cube")&& !obstacle->color.compare("red"))
+//      obstacle->value=value_group1_;
+
+//    else if(!obstacle->shape.compare("cube")&& !obstacle->color.compare("blue"))
+//      obstacle->value=value_group1_;
+
+//    else if(!obstacle->shape.compare("cube")&& !obstacle->color.compare("green"))
+//     obstacle->value=value_group2_;
+
+//    else if(!obstacle->shape.compare("cube")&& !obstacle->color.compare("yellow"))
+//     obstacle->value=value_group2_;
+
+//    else if(!obstacle->shape.compare("ball")&& !obstacle->color.compare("yellow"))
+//     obstacle->value=value_group2_;
+
+//    else if(!obstacle->shape.compare("ball")&& !obstacle->color.compare("red"))
+//     obstacle->value=value_group3_;
+
+//    else if(!obstacle->shape.compare("cylinder")&& !obstacle->color.compare("green"))
+//     obstacle->value=value_group3_;
+
+//    else if(!obstacle->shape.compare("triangle")&& !obstacle->color.compare("blue"))
+//     obstacle->value=value_group3_;
+
+//    else if(!obstacle->shape.compare("cross")&& !obstacle->color.compare("purble"))
+//     obstacle->value=value_group4_;
+
+//    else if(!obstacle->shape.compare("star")&& !obstacle->color.compare("purple"))
+//     obstacle->value=value_group4_;
+
+//    else if(!obstacle->shape.compare("star")&& !obstacle->color.compare("orange"))
+//     obstacle->value=value_group4_;
+
+//    else
+//    {
+//        ROS_ERROR("ObstacleState: Obstacle not known");
+
+//        obstacle->value=0;
+//        return false;
+
+//    }
+//    return true;
+//}

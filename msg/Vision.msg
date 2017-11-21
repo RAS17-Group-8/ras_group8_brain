@@ -1,0 +1,7 @@
+# 8 * uint16 for IR sensors
+#uint16 ch1
+
+
+geometry_msgs/PointStamped position
+int32 number
+
