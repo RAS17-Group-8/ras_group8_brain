@@ -54,6 +54,9 @@ Brain::Brain(ros::NodeHandle& node_handle)
   possible_obstacle_[15].name="solide obstacle";   possible_obstacle_[15].value=0;
   possible_obstacle_[16].name="removable obstacle";   possible_obstacle_[16].value=0;
 
+  edges_[0].point.x=maze_size_x_-15; edges_[0].point.y=15; edges_[0].explored=false;
+  edges_[1].point.x=maze_size_x_-15; edges_[1].point.y=maze_size_y_-15; edges_[1].explored=false;
+  edges_[2].point.x=15; edges_[2].point.y=maze_size_y_-15; edges_[2].explored=false;
 }
 
 Brain::~Brain()
@@ -112,6 +115,12 @@ bool Brain::readParameters()
     return false;
   if (!node_handle_.getParam("init/obstacle_file", obstacle_file_))
     return false;
+  if (!node_handle_.getParam("init/round_time", round_time_))
+    return false;
+  if (!node_handle_.getParam("init/maze_size_x", maze_size_x_))
+    return false;
+  if (!node_handle_.getParam("init/maze_size_y", maze_size_y_))
+    return false;
 
   return true;
 }
@@ -140,7 +149,8 @@ void Brain::stateMachine()
             break;
 
   }
-
+  int random_num;
+  geometry_msgs::Point random_point;
 }
 
 

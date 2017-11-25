@@ -12,6 +12,7 @@
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
 #include <visualization_msgs/Marker.h>
+#include <tf/transform_listener.h>
 #include "ras_group8_brain/Vision.h"
 
 namespace ras_group8_brain {
@@ -44,6 +45,12 @@ private:
       std::string name;
       int value;
   };
+  struct Edge
+  {
+      geometry_msgs::Point point;
+      bool explored;
+
+  };
 
 
   /* Brain States
@@ -60,22 +67,22 @@ private:
   bool findElementPath();
   bool findHomePath();
   bool findGoalPath();
+  bool findEdges();
   void goalMessageCallback(const geometry_msgs::PoseStamped &msg);
 
-  bool  pickUpArm();
-  bool  putDownArm(geometry_msgs::Point position);
+  bool pickUpArm(int msg_num);
+  bool putDownArm(geometry_msgs::Point position);
 
   bool readParameters();
   bool Speak(std_msgs::String msg);
 
-  bool ValuableObstacle(struct Obstacle *obstacle_global, ras_group8_brain::Vision *obstacle_msg);
-  bool RemovableObstacle(struct Obstacle *obstacle);
+  bool ValuableObstacle(struct Obstacle *obstacle_global, int msg_num);
+  bool RemovableObstacle(int msg_num);
   bool SolidObstacle(struct Obstacle *obstacle);
   bool addObstacleToList(struct Obstacle *obstacle, int* list_element);
 
   void pathDoneCallback(const std_msgs::Bool &msg);
   void visionMessageCallback(const ras_group8_brain::Vision &msg);
-
   bool pathVizualisation(nav_msgs::Path *path);
   bool pointVizualisation(geometry_msgs::Point point);
 
@@ -101,6 +108,8 @@ private:
   ros::Subscriber vision_msg_subscriber_;
   ros::Subscriber set_goal_subscriber_;
 
+  tf::TransformListener tf_listener_;
+
   /* Parameters
    */
 
@@ -125,14 +134,19 @@ private:
   bool round1_;
   int picked_up_element_;
   int planned_element_;
+  int planned_edge_;
   bool path_done_;
   bool obstacle_;
   bool home_;
+  double round_time_;
 
   //PathPlanning
   geometry_msgs::Pose actual_robot_position_;
   geometry_msgs::Pose robot_goal_rviz_;
   geometry_msgs::Pose robot_home_position_;
+  Edge edges_[3];
+  double maze_size_x_;
+  double maze_size_y_;
 
   nav_msgs::Path  actual_path_;
 

@@ -22,7 +22,7 @@ void Brain::pathExectuionState()
    {
        state_=5;
    }
-   else if(path_done_&&!round1_&&planned_element_>=0) //////////////think what happens if the robot is not able to find its goal
+   else if(path_done_&&planned_element_>=0) //////////////think what happens if the robot is not able to find its goal
    {
        // robot turn a bit move a bit
        ros::spinOnce();
@@ -32,11 +32,20 @@ void Brain::pathExectuionState()
            state_=2;
        }
    }
+   else if((round_time_-(run_time_-ros::Time::now()).toSec())<1)
+   {
+      ROS_INFO("Time to go home");
+      state_=2;
+   }
    else if(path_done_&&round1_)
    {
+       if (planned_edge_>=0)
+       {
+            edges_[planned_edge_].explored=true;
+            planned_edge_=-1;
+       }
        state_=1;
    }
-
 }
 
 

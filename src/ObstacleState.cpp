@@ -12,52 +12,68 @@ bool  Brain::obstacleState()
 {
     ROS_INFO("Obstacle State");
 
-    //////////////////////////////////////Change message in global position////////////////
-    new_obstacle_global_.position.x=0.8;  //change to message
-    new_obstacle_global_.position.y=1.6;   //change to message
-    new_obstacle_global_.number=new_obstacle_msg_.number;
-    ///////////////////////////////////////////////////////////////////////////////////////
+    for (int i=0;i<3;i++)
+    {
+//        geometry_msgs::PointStamped obstacle_robot_frame=new_obstacle_msg_.position[i];
+//        geometry_msgs::PointStamped obstacle_position_global;
 
-    if(new_obstacle_global_.number>0 && new_obstacle_global_.number<=14) //valuable obstacle
-    {
-        if (!Brain::ValuableObstacle(&new_obstacle_global_,&new_obstacle_msg_))
+//        try{
+//            tf_listener_.transformPoint("/map",obstacle_robot_frame,obstacle_position_global);
+
+//        }
+//        catch(tf::TransformException ex){
+//            ROS_ERROR("Transformation:%s",ex.what());
+//        }
+//        new_obstacle_global_.position=obstacle_position_global.point;
+//        new_obstacle_global_.number=new_obstacle_msg_.number[i];
+
+        //////////////////////////////////////Change message in global position////////////////
+        new_obstacle_global_.position.x=0.8;  //change to message
+        new_obstacle_global_.position.y=1.6;   //change to message
+        new_obstacle_global_.number=new_obstacle_msg_.number[i];
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+
+        if(new_obstacle_global_.number>0 && new_obstacle_global_.number<=14) //valuable obstacle
         {
-            return false;
+            if (!Brain::ValuableObstacle(&new_obstacle_global_,i))
+            {
+                return false;
+            }
+            state_=3;
         }
-        state_=3;
-    }
-    else if (new_obstacle_global_.number==15) //Solide obstacle
-    {
-        if (!Brain::SolidObstacle(&new_obstacle_global_))
-            return false;
-        if(round1_)
+        else if (new_obstacle_global_.number==15) //Solide obstacle
         {
-           state_=1;
+            if (!Brain::SolidObstacle(&new_obstacle_global_))
+                return false;
+            if(round1_)
+            {
+                state_=1;
+            }
+            else
+            {
+                state_=2;
+            }
+
+        }
+        else if(new_obstacle_global_.number==16) //removable obstacle
+        {
+            if (!Brain::RemovableObstacle(i))
+                return false;
+            state_=3;
         }
         else
         {
-           state_=2;
-        }
-
-    }
-    else if(new_obstacle_global_.number==16) //removable obstacle
-    {
-        if (!Brain::RemovableObstacle(&new_obstacle_global_))
+            ROS_INFO("ObstacleState:No_Obstacle");
+            obstacle_=false;
+            state_=3;
             return false;
-        state_=3;
+        }
     }
-    else
-    {
-        ROS_INFO("ObstacleState:No_Obstacle");
-        obstacle_=false;
-        state_=3;
-        return false;
-    }
-
-   return true;
+    return true;
 }
 
-bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, ras_group8_brain::Vision *obstacle_msg)
+bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_num)
 {
     int list_element;
     bool pickup=true;
@@ -75,7 +91,7 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, ras_group8
     { ///////////////
       ///Drive in that position that the arm can touch the the obstacle
       ////////////////
-        if(!pickUpArm())
+        if(!pickUpArm(msg_num))
             return false;
 
         picked_up_element_=planned_element_;
@@ -125,9 +141,9 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
 }
 
 
-bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
+bool Brain::RemovableObstacle(int msg_num)
 {
-    if(!pickUpArm())
+    if(!pickUpArm(msg_num))
         return false;
     ///////////////////7
     ///Robo Turn round
@@ -143,7 +159,7 @@ bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
 bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
 {
 
-    /////////////////////7
+    /////////////////////
     ///add to map
     /// ////////////////////////
     return true;
@@ -151,7 +167,7 @@ bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
 
 void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
 {
-    if (msg.number!=0)
+    if (msg.number[0]!=0)
     {
         obstacle_=true;
         new_obstacle_msg_=msg;

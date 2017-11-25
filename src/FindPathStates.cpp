@@ -32,7 +32,11 @@ bool Brain::findPathState()
 
 bool Brain::explorState()
 {
-    findGoalPath();
+    //findGoalPath();
+    if(!findEdges())
+    {
+        return false;
+    }
     ROS_INFO("Explore State");
     state_=3;
     pathVizualisation(&actual_path_);
@@ -40,14 +44,77 @@ bool Brain::explorState()
     return true;
 }
 
+bool Brain::findEdges()
+{
+    nav_msgs::GetPlan path;
+    int actual_points=0;
+    int last_points=0;
+
+    planned_element_=-1;
+    planned_edge_=-1;
+    bool find_path=false;
+
+    path.request.start.pose=actual_robot_position_;
+
+    for(int i=0; i<3; i++) ///////////////change to size??
+    {
+        if (!edges_[i].explored)
+        {
+            path.request.goal.pose.position=edges_[i].point;
+
+            if(!get_path_client_.call(path))
+            {
+                ROS_ERROR("ExploreState: Not abele to compute Path");
+            }
+
+            actual_points=path.response.plan.header.stamp.sec;
+
+            if(actual_points>last_points)
+            {
+                actual_path_=path.response.plan;
+                last_points=actual_points;
+                planned_edge_=i;
+            }
+            find_path=true;
+            ROS_INFO("PathElements %i",actual_points);
+        }
+    }
+    if(!find_path)
+    {
+        int random_num;
+        geometry_msgs::Point random_point;
+
+        random_num=round(100*(maze_size_x_-0.3));
+        random_point.x=0.01*(rand()%random_num)+0.15;
+        random_num=round(100*(maze_size_y_-0.3));
+        random_point.y=0.01*(rand()%random_num)+0.15;
+
+
+
+        path.request.goal.pose.position=random_point;
+        if(!get_path_client_.call(path))
+        {
+            ROS_ERROR("ExploreState: Not abele to compute Path");
+            return false;
+        }
+        ROS_INFO("ExploreState:Go to random point");
+    }
+
+    return true;
+}
+
+
 bool Brain::findElementPath()
 {
     int num_ob;
     nav_msgs::GetPlan path;
     int actual_gain=0;
-    int last_gain=0;
+    int last_gain=-10000;
+    bool find_path=false;
 
     planned_element_=-1;
+    planned_edge_=-1;
+
 
     path.request.start.pose=actual_robot_position_;
 
@@ -56,7 +123,6 @@ bool Brain::findElementPath()
         ROS_ERROR("FindPathState: No Obstacles in the List");
         return false;
     }
-    //ROS_ERROR("Number %d",num_ob);
     for(int i=0; i<num_ob; i++)
     {
         if (!ObstacleList_[i].recovered && ObstacleList_[i].try_counter<=obstacle_try_)
@@ -68,7 +134,8 @@ bool Brain::findElementPath()
                 ROS_ERROR("FindPathState: Not abele to compute Path");
                 return false;
             }
-            actual_gain=ObstacleList_[i].value-path.response.plan.header.seq;
+            double time_factor=(round_time_-(ros::Time::now()-run_time_).toSec())/(2*round_time_)+0.5;
+            actual_gain=ObstacleList_[i].value-round(path.response.plan.header.seq/time_factor);
 
             if(actual_gain>last_gain)
             {
@@ -76,10 +143,14 @@ bool Brain::findElementPath()
                 last_gain=actual_gain;
                 planned_element_=i;
             }
-            ROS_INFO("PathCost %i",actual_gain);
+            ROS_INFO("PathCost %i Time factor %f",actual_gain,time_factor);
+            find_path=true;
         }
     }
-    return true;
+    if(find_path)
+        return true;
+    else
+        return false;
 
 }
 
@@ -101,6 +172,7 @@ bool Brain::findHomePath()
 
     return true;
 }
+
 
 bool Brain::findGoalPath()
 {

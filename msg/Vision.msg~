@@ -2,6 +2,6 @@
 #uint16 ch1
 
 
-geometry_msgs/PointStamped position
-int32 class
+geometry_msgs/PointStamped[3] position
+int32[3] number
 

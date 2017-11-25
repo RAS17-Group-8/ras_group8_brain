@@ -19,6 +19,7 @@ bool  Brain::initState()
 
    ROS_INFO("Init State");
    planned_element_=-1;
+   planned_edge_=-1;
    picked_up_element_=-1;
    path_done_=false;
    obstacle_=false;

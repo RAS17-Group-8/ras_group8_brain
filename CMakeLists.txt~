@@ -10,6 +10,7 @@ find_package(catkin REQUIRED
   message_generation 
   ras_group8_arm_controller
   visualization_msgs
+  tf
 )
 
 include_directories(
@@ -40,6 +41,7 @@ catkin_package(
     ras_group8_arm_controller
     visualization_msgs
     message_runtime
+    tf
 
    #DEPENDS
 )

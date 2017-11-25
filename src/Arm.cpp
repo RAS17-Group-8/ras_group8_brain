@@ -5,7 +5,7 @@
 #include <time.h>
 namespace ras_group8_brain {
 
-bool  Brain::pickUpArm()
+bool  Brain::pickUpArm(int msg_num)
 {
     ras_group8_arm_controller::MoveArm arm_msg;
     geometry_msgs::Point arm_position;
@@ -13,9 +13,9 @@ bool  Brain::pickUpArm()
     for (int i=0; i<pickup_attempt_; i++)
     {
         ///////////should we change the position for each attempt//////////////////
-        arm_position.x=100*(new_obstacle_msg_.position.point.y);
-        arm_position.y=100*(new_obstacle_msg_.position.point.x+0.08);
-        arm_position.z=100*(new_obstacle_msg_.position.point.z-0.16);
+        arm_position.x=100*(new_obstacle_msg_.position[msg_num].point.y);
+        arm_position.y=100*(new_obstacle_msg_.position[msg_num].point.x+0.08);
+        arm_position.z=100*(new_obstacle_msg_.position[msg_num].point.z-0.16);
 
         arm_msg.request.position.x=arm_position.x+rand()%(2*pickup_range_)-pickup_range_;
         arm_msg.request.position.y=arm_position.y+rand()%(2*pickup_range_)-pickup_range_;
