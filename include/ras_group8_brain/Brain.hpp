@@ -62,7 +62,7 @@ private:
   bool findGoalPath();
   void goalMessageCallback(const geometry_msgs::PoseStamped &msg);
 
-  bool  pickUpArm(geometry_msgs::Point position);
+  bool  pickUpArm();
   bool  putDownArm(geometry_msgs::Point position);
 
   bool readParameters();
@@ -115,7 +115,7 @@ private:
 
   std::string obstacle_file_;
 
-
+  ros::Time run_time_;
 
 
   /* Variables

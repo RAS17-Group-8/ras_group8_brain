@@ -18,8 +18,8 @@ vision_msg_topic: /ras_group8_vision_system/obstacle
 
 
 arm_up:
-    pickup_attempt: 10
-    pickup_range: 5
+    pickup_attempt: 4
+    pickup_range: 2
 
 obstacle:
     position_accurancy: 0.05
@@ -41,5 +41,5 @@ home:
 
 init:
     first_round: false
-    obstacle_file: /home/ras/ObstacleFile.txt
+    obstacle_file: /home/ras18/ObstacleFile.txt
 

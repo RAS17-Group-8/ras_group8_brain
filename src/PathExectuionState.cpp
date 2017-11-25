@@ -24,8 +24,13 @@ void Brain::pathExectuionState()
    }
    else if(path_done_&&!round1_&&planned_element_>=0) //////////////think what happens if the robot is not able to find its goal
    {
-       ObstacleList_[planned_element_].try_counter++;
-       state_=2;
+       // robot turn a bit move a bit
+       ros::spinOnce();
+       if(!obstacle_)
+       {
+           ObstacleList_[planned_element_].try_counter++;
+           state_=2;
+       }
    }
    else if(path_done_&&round1_)
    {

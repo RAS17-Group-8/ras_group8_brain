@@ -8,30 +8,28 @@ int main(int argc, char** argv)
 
   ras_group8_brain::Brain main_object(node_handle);
 
-  ros::Time start_time;
-  ros::Time end_time;
+  ros::Time start_time_spin;
+  ros::Time end_time_spin;
   ros::Duration sleep_time(1);
-  ros::Duration diff_time;
+  ros::Duration diff_time_spin;
 
   while (ros::ok())
   {
-      start_time=ros::Time::now();
+      start_time_spin=ros::Time::now();
 
       ros::spinOnce();
       main_object.stateMachine();
 
 
-      end_time=ros::Time::now();
-      diff_time=sleep_time-(end_time-start_time);
-      ROS_INFO("time %f",diff_time.toSec());
+      end_time_spin=ros::Time::now();
+      diff_time_spin=sleep_time-(end_time_spin-start_time_spin);
+      //ROS_INFO("time %f",diff_time_spin.toSec());
 
-      if(diff_time.toSec()>0)
+      if(diff_time_spin.toSec()>0)
       {
-          diff_time.sleep();
+          diff_time_spin.sleep();
       }
   }
-
-
 
   return 0;
 }

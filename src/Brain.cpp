@@ -8,6 +8,7 @@ namespace ras_group8_brain {
 Brain::Brain(ros::NodeHandle& node_handle)
     : node_handle_(node_handle)
 {
+  run_time_=ros::Time::now();
   if (!readParameters()) {
     ROS_ERROR("Could not read parameters.");
     ros::requestShutdown();
@@ -118,8 +119,11 @@ bool Brain::readParameters()
 void Brain::stateMachine()
 {
   ros::spinOnce();
-  ROS_ERROR("State: %i, NumObstacles %i, Home %d, Obstcle:%d", state_, ObstacleList_.size(),home_,obstacle_);
-  ROS_ERROR("PlanElement: %i, PickUu_ELE: %i, pathdone: %d", planned_element_,picked_up_element_, path_done_);
+  ROS_INFO("State: %i, NumObstacles %i, Home %d, Obstcle:%d", state_, ObstacleList_.size(),home_,obstacle_);
+  ROS_INFO("PlanElement: %i, PickUu_ELE: %i, pathdone: %d", planned_element_,picked_up_element_, path_done_);
+  ros::Duration act_time=ros::Time::now()-run_time_;
+  ROS_INFO("Time: %f",act_time.toSec());
+
   switch (state_)
   {
     case 0: Brain::initState();

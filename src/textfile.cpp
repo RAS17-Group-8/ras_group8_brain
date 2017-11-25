@@ -8,6 +8,7 @@ namespace ras_group8_brain {
 
 bool Brain::readTextfile()
 {
+    ROS_INFO("5");
     Brain::Obstacle newObstacle;
     FILE* obstacleFile=fopen(obstacle_file_.c_str(),"r");
 
@@ -37,10 +38,12 @@ bool Brain::readTextfile()
 
 bool Brain::writeTextfile(Brain::Obstacle *newObstacle)
 {
-
      FILE* obstacleFile=fopen(obstacle_file_.c_str(),"a");
-
-     fprintf(obstacleFile,"%lf,%lf,%d\n",newObstacle->position.x,newObstacle->position.y,newObstacle->number);
+     if (obstacleFile == NULL) {
+         ROS_ERROR("Failed to open target file");
+         return false;
+     }
+     fprintf(obstacleFile,"%lf,%lf,%d",newObstacle->position.x,newObstacle->position.y,newObstacle->number);
 
      fclose(obstacleFile);
 }

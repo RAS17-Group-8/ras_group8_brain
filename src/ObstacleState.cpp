@@ -60,6 +60,7 @@ bool  Brain::obstacleState()
 bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, ras_group8_brain::Vision *obstacle_msg)
 {
     int list_element;
+    bool pickup=true;
 
     if(Brain::addObstacleToList(obstacle_global, &list_element))
     {
@@ -71,12 +72,18 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, ras_group8
     }
 
     if(list_element==planned_element_)
-    {
-        if(!pickUpArm(obstacle_msg->position.point))
+    { ///////////////
+      ///Drive in that position that the arm can touch the the obstacle
+      ////////////////
+        if(!pickUpArm())
             return false;
 
         picked_up_element_=planned_element_;
         planned_element_=-1;
+    }
+    if (list_element=!planned_element_||pickup==false)
+    {
+        //continue to drive
     }
     return true;
 
@@ -90,13 +97,16 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
         double position_x=std::abs(ObstacleList_[i].position.x-obstacle->position.x);
         double position_y=std::abs(ObstacleList_[i].position.y-obstacle->position.y);
 
-        if(position_x<obstacle_position_accurancy_&&position_y<obstacle_position_accurancy_
-           &&ObstacleList_[i].number==obstacle->number)
+     ////////////only for test
+//        if(position_x<obstacle_position_accurancy_&&position_y<obstacle_position_accurancy_
+//           &&ObstacleList_[i].number==obstacle->number)
+        /////////////////////
+        if(ObstacleList_[i].number==obstacle->number)
         {
             *list_element=i;
             ObstacleList_[i].recovered=false;
             ObstacleList_[i].try_counter=0;
-            ROS_INFO("ObstacleState: Element Exists ");
+            ROS_INFO("ObstacleState: Element Exists %d ",i);
             return false;
         }
     }
@@ -117,11 +127,11 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
 
 bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
 {
-    if(!pickUpArm(obstacle->position))
+    if(!pickUpArm())
         return false;
-
-    //Robo Turn round
-
+    ///////////////////7
+    ///Robo Turn round
+    ////////////////////////
     if(!putDownArm(home_obstacle_pos_))
         return false;
 
@@ -133,8 +143,9 @@ bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
 bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
 {
 
-
+    /////////////////////7
     ///add to map
+    /// ////////////////////////
     return true;
 }
 
@@ -145,7 +156,6 @@ void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
         obstacle_=true;
         new_obstacle_msg_=msg;
 
-        ROS_INFO("VisionMessage");
     }
     else
     {
