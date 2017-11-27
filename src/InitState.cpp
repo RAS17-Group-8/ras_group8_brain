@@ -24,6 +24,7 @@ bool  Brain::initState()
    path_done_=false;
    obstacle_=false;
    home_=false;
+   go_home_=false;
 
    std_msgs::String greeting;
    greeting.data="Hello I'm a robot";

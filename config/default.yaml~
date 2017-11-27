@@ -42,7 +42,6 @@ home:
 init:
     first_round: false
     obstacle_file: /home/ras/ObstacleFile.txt
-    round_time: 5
-    maze_size_x: 2.25
-    maze_size_y: 2.25
-
+    round_time: 300 	
+    maze_size_x: 2.40
+    maze_size_y: 2.40

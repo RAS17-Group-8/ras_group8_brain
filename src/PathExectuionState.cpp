@@ -32,8 +32,9 @@ void Brain::pathExectuionState()
            state_=2;
        }
    }
-   else if((round_time_-(run_time_-ros::Time::now()).toSec())<1)
+   else if(round1_&&!go_home_&&(round_time_-(run_time_-ros::Time::now()).toSec())<1)
    {
+      go_home_=true;
       ROS_INFO("Time to go home");
       state_=2;
    }

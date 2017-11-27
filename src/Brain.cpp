@@ -54,9 +54,9 @@ Brain::Brain(ros::NodeHandle& node_handle)
   possible_obstacle_[15].name="solide obstacle";   possible_obstacle_[15].value=0;
   possible_obstacle_[16].name="removable obstacle";   possible_obstacle_[16].value=0;
 
-  edges_[0].point.x=maze_size_x_-15; edges_[0].point.y=15; edges_[0].explored=false;
-  edges_[1].point.x=maze_size_x_-15; edges_[1].point.y=maze_size_y_-15; edges_[1].explored=false;
-  edges_[2].point.x=15; edges_[2].point.y=maze_size_y_-15; edges_[2].explored=false;
+  edges_[0].point.x=maze_size_x_-0.15; edges_[0].point.y=0.15; edges_[0].explored=false;
+  edges_[1].point.x=maze_size_x_-0.15; edges_[1].point.y=maze_size_y_-0.15; edges_[1].explored=false;
+  edges_[2].point.x=0.15; edges_[2].point.y=maze_size_y_-0.15; edges_[2].explored=false;
 }
 
 Brain::~Brain()

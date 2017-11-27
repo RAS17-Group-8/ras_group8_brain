@@ -26,20 +26,24 @@ bool Brain::findPathState()
     }
     state_=3;
     pathVizualisation(&actual_path_);
+    actual_path_.header.stamp=ros::Time::now();
+    actual_path_.header.frame_id="/map";
     send_path_publisher_.publish(actual_path_);
     return true;
 }
 
 bool Brain::explorState()
 {
+    ROS_INFO("Explore State");
     //findGoalPath();
     if(!findEdges())
     {
         return false;
     }
-    ROS_INFO("Explore State");
     state_=3;
     pathVizualisation(&actual_path_);
+    actual_path_.header.stamp=ros::Time::now();
+    actual_path_.header.frame_id="/map";
     send_path_publisher_.publish(actual_path_);
     return true;
 }
@@ -64,19 +68,22 @@ bool Brain::findEdges()
 
             if(!get_path_client_.call(path))
             {
-                ROS_ERROR("ExploreState: Not abele to compute Path");
+                ROS_ERROR("ExploreState: Not abele to compute edge Path");
             }
-
-            actual_points=path.response.plan.header.stamp.sec;
-
-            if(actual_points>last_points)
+            else
             {
-                actual_path_=path.response.plan;
-                last_points=actual_points;
-                planned_edge_=i;
+
+                actual_points=path.response.plan.header.stamp.sec;
+
+                if(actual_points>last_points)
+                {
+                    actual_path_=path.response.plan;
+                    last_points=actual_points;
+                    planned_edge_=i;
+                }
+                find_path=true;
+                ROS_INFO("PathElements %i",actual_points);
             }
-            find_path=true;
-            ROS_INFO("PathElements %i",actual_points);
         }
     }
     if(!find_path)
@@ -89,15 +96,14 @@ bool Brain::findEdges()
         random_num=round(100*(maze_size_y_-0.3));
         random_point.y=0.01*(rand()%random_num)+0.15;
 
-
-
         path.request.goal.pose.position=random_point;
         if(!get_path_client_.call(path))
         {
-            ROS_ERROR("ExploreState: Not abele to compute Path");
+            ROS_ERROR("ExploreState: Not abele to compute random Path");
             return false;
         }
-        ROS_INFO("ExploreState:Go to random point");
+        actual_path_=path.response.plan;
+        ROS_INFO("ExploreState:Go to random point x: %f, y:%f",random_point.x,random_point.y);
     }
 
     return true;

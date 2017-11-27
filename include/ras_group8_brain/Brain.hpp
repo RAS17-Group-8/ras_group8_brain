@@ -139,6 +139,7 @@ private:
   bool obstacle_;
   bool home_;
   double round_time_;
+  bool go_home_;
 
   //PathPlanning
   geometry_msgs::Pose actual_robot_position_;
