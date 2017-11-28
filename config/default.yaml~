@@ -12,6 +12,7 @@ speaker_topic: /espeak/string
 send_path_topic: /ras_group8_brain/send_path
 path_stop_topic: /ras_group8_brain/stop_driving
 path_done_topic: /ras_group8_navigation_system/path_done
+robot_position_topic: /ras_group8_navigation_system/robot_position
 
 #ObstacleDetection
 vision_msg_topic: /ras_group8_vision_system/obstacle
@@ -40,8 +41,8 @@ home:
     orientation_w: 0.7
 
 init:
-    first_round: false
+    first_round: true
     obstacle_file: /home/ras/ObstacleFile.txt
-    round_time: 300 	
+    round_time: 80
     maze_size_x: 2.40
     maze_size_y: 2.40

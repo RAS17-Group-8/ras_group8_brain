@@ -38,7 +38,7 @@ bool Brain::writeTextfile(Brain::Obstacle *newObstacle)
          ROS_ERROR("Failed to open target file");
          return false;
      }
-     fprintf(obstacleFile,"%lf,%lf,%d\n",newObstacle->position.x,newObstacle->position.y,newObstacle->number);
+     fprintf(obstacleFile,"\n%lf,%lf,%d",newObstacle->position.x,newObstacle->position.y,newObstacle->number);
 
      fclose(obstacleFile);
 }

@@ -8,6 +8,8 @@
 #include <geometry_msgs/Point.h>
 #include <nav_msgs/GetPlan.h>
 #include <nav_msgs/Path.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose.h>
 #include <ras_group8_arm_controller/MoveArm.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
@@ -82,6 +84,7 @@ private:
   bool addObstacleToList(struct Obstacle *obstacle, int* list_element);
 
   void pathDoneCallback(const std_msgs::Bool &msg);
+  void robotPositionCallback(const geometry_msgs::PoseStamped &msg);
   void visionMessageCallback(const ras_group8_brain::Vision &msg);
   bool pathVizualisation(nav_msgs::Path *path);
   bool pointVizualisation(geometry_msgs::Point point);
@@ -107,6 +110,7 @@ private:
   ros::Subscriber path_done_subscriber_;
   ros::Subscriber vision_msg_subscriber_;
   ros::Subscriber set_goal_subscriber_;
+  ros::Subscriber robot_position_subscriber_;
 
   tf::TransformListener tf_listener_;
 
@@ -121,6 +125,7 @@ private:
   std::string path_stop_topic_;
   std::string path_done_topic_;
   std::string vision_msg_topic_;
+  std::string robot_position_topic_;
 
   std::string obstacle_file_;
 
@@ -173,6 +178,7 @@ private:
 
   //home
   geometry_msgs::Point home_obstacle_pos_;
+  double home_accurancy_;
 
   //Vizualistion
   visualization_msgs::Marker object_points;

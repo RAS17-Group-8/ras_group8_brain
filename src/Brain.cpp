@@ -29,6 +29,7 @@ Brain::Brain(ros::NodeHandle& node_handle)
 
   //Subscriber
   path_done_subscriber_=node_handle_.subscribe(path_done_topic_,1,&Brain::pathDoneCallback, this);
+  robot_position_subscriber_=node_handle_.subscribe(robot_position_topic_,1,&Brain::robotPositionCallback, this);
   vision_msg_subscriber_=node_handle_.subscribe(vision_msg_topic_,1,&Brain::visionMessageCallback, this);
   set_goal_subscriber_=node_handle_.subscribe("/move_base_simple/goal",1,&Brain::goalMessageCallback, this);
 
@@ -81,6 +82,8 @@ bool Brain::readParameters()
     return false;
   if (!node_handle_.getParam("vision_msg_topic", vision_msg_topic_))
     return false;
+  if (!node_handle_.getParam("robot_position_topic", robot_position_topic_))
+    return false;
   if (!node_handle_.getParam("arm_up/pickup_attempt", pickup_attempt_))
     return false;
   if (!node_handle_.getParam("arm_up/pickup_range", pickup_range_))
@@ -111,6 +114,8 @@ bool Brain::readParameters()
     return false;
   if (!node_handle_.getParam("home/orientation_w", robot_home_position_.orientation.w))
     return false;
+  if (!node_handle_.getParam("home/home_accurancy", home_accurancy_))
+    return false;
   if (!node_handle_.getParam("init/first_round", round1_))
     return false;
   if (!node_handle_.getParam("init/obstacle_file", obstacle_file_))
@@ -128,8 +133,8 @@ bool Brain::readParameters()
 void Brain::stateMachine()
 {
   ros::spinOnce();
-  ROS_INFO("State: %i, NumObstacles %i, Home %d, Obstcle:%d", state_, ObstacleList_.size(),home_,obstacle_);
-  ROS_INFO("PlanElement: %i, PickUu_ELE: %i, pathdone: %d", planned_element_,picked_up_element_, path_done_);
+  ROS_INFO("State: %d, NumObstacles %i, Home %d, Obstcle:%d, GoHOme:%d", state_, ObstacleList_.size(),home_,obstacle_,go_home_);
+  ROS_INFO("PlanElement: %i, PickUu_ELE: %i, pathdone: %d Round1:%d", planned_element_,picked_up_element_, path_done_,round1_);
   ros::Duration act_time=ros::Time::now()-run_time_;
   ROS_INFO("Time: %f",act_time.toSec());
 
@@ -149,8 +154,6 @@ void Brain::stateMachine()
             break;
 
   }
-  int random_num;
-  geometry_msgs::Point random_point;
 }
 
 

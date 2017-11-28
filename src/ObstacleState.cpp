@@ -89,7 +89,13 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_nu
 
     if(list_element==planned_element_)
     { ///////////////
-      ///Drive in that position that the arm can touch the the obstacle
+//        nav_msgs::Path path;
+//        path.poses.resize(1);
+//        path.poses[0].pose.position=actual_robot_position_.position;
+//        path.poses[0].pose.orientation=actual_robot_position_.orientation;
+//        path.header.stamp=ros::Time::now();
+//        path.header.frame_id="/map";
+//        send_path_publisher_.publish(path);
       ////////////////
         if(!pickUpArm(msg_num))
             return false;
@@ -145,8 +151,14 @@ bool Brain::RemovableObstacle(int msg_num)
 {
     if(!pickUpArm(msg_num))
         return false;
-    ///////////////////7
-    ///Robo Turn round
+    ///////////////////Turn around//////////////////////////
+//    nav_msgs::Path path;
+//    path.poses.resize(1);
+//    path.poses[0].pose.position=actual_robot_position_.position;
+//    path.poses[0].pose.orientation=actual_robot_position_.orientation;
+//    path.header.stamp=ros::Time::now();
+//    path.header.frame_id="/map";
+//    send_path_publisher_.publish(path);
     ////////////////////////
     if(!putDownArm(home_obstacle_pos_))
         return false;
