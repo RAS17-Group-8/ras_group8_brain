@@ -14,9 +14,6 @@ void Brain::pathExectuionState()
    if(obstacle_&&!home_)
    {
       state_=4;
-      std_msgs::Bool stop;
-      stop.data=true;
-      path_stop_publisher_.publish(stop);
    }
    else if(home_&&picked_up_element_>=0)
    {

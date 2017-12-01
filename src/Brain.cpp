@@ -90,6 +90,8 @@ bool Brain::readParameters()
     return false;
   if (!node_handle_.getParam("obstacle/position_accurancy", obstacle_position_accurancy_))
     return false;
+  if (!node_handle_.getParam("obstacle/detection_accurancy", obstacle_detection_accurancy_))
+    return false;
   if (!node_handle_.getParam("obstacle/obstacle_try", obstacle_try_))
     return false;
   if (!node_handle_.getParam("obstacle/value_group1", value_group1_))

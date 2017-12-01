@@ -24,6 +24,7 @@ arm_up:
 
 obstacle:
     position_accurancy: 0.05
+    detection_accurancy: 0.10
     obstacle_try: 10
     value_group1: 100
     value_group2: 1000
@@ -39,10 +40,10 @@ home:
     position_y: 0.15
     orientation_z: 0.7
     orientation_w: 0.7
-    home_accurancy:0.1
+    home_accurancy: 0.1
 
 init:
-    first_round: true
+    first_round: false
     obstacle_file: /home/ras/ObstacleFile.txt
     round_time: 80
     maze_size_x: 2.40

@@ -14,37 +14,46 @@ bool  Brain::obstacleState()
 
     for (int i=0;i<3;i++)
     {
-//        geometry_msgs::PointStamped obstacle_robot_frame=new_obstacle_msg_.position[i];
-//        geometry_msgs::PointStamped obstacle_position_global;
 
-//        try{
-//            tf_listener_.transformPoint("/map",obstacle_robot_frame,obstacle_position_global);
-
-//        }
-//        catch(tf::TransformException ex){
-//            ROS_ERROR("Transformation:%s",ex.what());
-//        }
-//        new_obstacle_global_.position=obstacle_position_global.point;
-//        new_obstacle_global_.number=new_obstacle_msg_.number[i];
 
         //////////////////////////////////////Change message in global position////////////////
-        new_obstacle_global_.position.x=0.8;  //change to message
-        new_obstacle_global_.position.y=1.6;   //change to message
-        new_obstacle_global_.number=new_obstacle_msg_.number[i];
+        new_obstacle_global_[i].position.x=0.8;  //change to message
+        new_obstacle_global_[i].position.y=1.6;   //change to message
+        new_obstacle_global_[i].number=new_obstacle_msg_.number[i];
         ///////////////////////////////////////////////////////////////////////////////////////
 
 
-        if(new_obstacle_global_.number>0 && new_obstacle_global_.number<=14) //valuable obstacle
+        if(new_obstacle_global_[i].number>0 && new_obstacle_global_[i].number<=14) //valuable obstacle
         {
-            if (!Brain::ValuableObstacle(&new_obstacle_global_,i))
+
+            if (!Brain::driveToObstacle(i))
+            {
+                ROS_ERROR("ObstacleState: Not able to drive near to an obstacle");
+            }
+
+            std_msgs::Bool stop;
+            stop.data=true;
+            path_stop_publisher_.publish(stop);
+
+
+            if (!Brain::ValuableObstacle(&new_obstacle_global_[i],i))
             {
                 return false;
             }
+
+            /////////////Send old path again//////////////////
+            /////////////how do we extract finished points///////////////
+            actual_path_.header.stamp=ros::Time::now();
+            send_path_publisher_.publish(actual_path_);
+
+
+            ///////////////////////////////////////////
+
             state_=3;
         }
-        else if (new_obstacle_global_.number==15) //Solide obstacle
+        else if (new_obstacle_global_[i].number==15) //Solide obstacle
         {
-            if (!Brain::SolidObstacle(&new_obstacle_global_))
+            if (!Brain::SolidObstacle(&new_obstacle_global_[i]))
                 return false;
             if(round1_)
             {
@@ -56,7 +65,7 @@ bool  Brain::obstacleState()
             }
 
         }
-        else if(new_obstacle_global_.number==16) //removable obstacle
+        else if(new_obstacle_global_[i].number==16) //removable obstacle
         {
             if (!Brain::RemovableObstacle(i))
                 return false;
@@ -88,15 +97,7 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_nu
     }
 
     if(list_element==planned_element_)
-    { ///////////////
-//        nav_msgs::Path path;
-//        path.poses.resize(1);
-//        path.poses[0].pose.position=actual_robot_position_.position;
-//        path.poses[0].pose.orientation=actual_robot_position_.orientation;
-//        path.header.stamp=ros::Time::now();
-//        path.header.frame_id="/map";
-//        send_path_publisher_.publish(path);
-      ////////////////
+    {
         if(!pickUpArm(msg_num))
             return false;
 
@@ -184,6 +185,22 @@ void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
         obstacle_=true;
         new_obstacle_msg_=msg;
 
+        for (int i=0;i<3;i++)
+        {
+
+            geometry_msgs::PointStamped obstacle_robot_frame=new_obstacle_msg_.position[i];
+            geometry_msgs::PointStamped obstacle_position_global;
+
+            try{
+                tf_listener_.transformPoint("/map",obstacle_robot_frame,obstacle_position_global);
+
+            }
+            catch(tf::TransformException ex){
+                ROS_ERROR("Transformation:%s",ex.what());
+            }
+            new_obstacle_global_[i].position=obstacle_position_global.point;
+            new_obstacle_global_[i].number=new_obstacle_msg_.number[i];
+        }
     }
     else
     {
@@ -191,5 +208,47 @@ void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
     }
 }
 
+bool Brain::driveToObstacle(int msg_num)
+{
+    double orientation_obst=atan2(new_obstacle_msg_.position[msg_num].point.x,new_obstacle_msg_.position[msg_num].point.y); //Obstacle
+
+    double siny=2*actual_robot_position_.orientation.w*actual_robot_position_.orientation.z;
+    double cosy=1-2*actual_robot_position_.orientation.z*actual_robot_position_.orientation.z;
+    double orientation=atan2(siny,cosy)+orientation_obst;
+
+    geometry_msgs::Quaternion new_orientation;
+    new_orientation.z=sin(0.5*orientation);
+    new_orientation.w=cos(0.5*orientation);
+
+    nav_msgs::Path path;
+    path.poses.resize(1);
+    path.poses[0].pose.position.x=new_obstacle_global_[msg_num].position.x-cos(orientation)*obstacle_detection_accurancy_;
+    path.poses[0].pose.position.y=new_obstacle_global_[msg_num].position.y-sin(orientation)*obstacle_detection_accurancy_;
+    path.poses[0].pose.orientation=new_orientation;
+    path.header.stamp=ros::Time::now();
+    path.header.frame_id="/map";
+    send_path_publisher_.publish(path);
+
+
+    ros::Duration wait_time(0.5);
+
+
+    for (int i=0; i<6;i++)
+    {
+        ROS_INFO("Wait for driving");
+        if(path_done_)
+        {
+            return true;
+        }
+        else
+        {
+            wait_time.sleep();
+
+        }
+        ros::spinOnce();
+    }
+    return false;
+
+}
 
 } /* namespace */

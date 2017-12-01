@@ -47,6 +47,7 @@ private:
       std::string name;
       int value;
   };
+
   struct Edge
   {
       geometry_msgs::Point point;
@@ -82,6 +83,7 @@ private:
   bool RemovableObstacle(int msg_num);
   bool SolidObstacle(struct Obstacle *obstacle);
   bool addObstacleToList(struct Obstacle *obstacle, int* list_element);
+  bool driveToObstacle(int msg_num);
 
   void pathDoneCallback(const std_msgs::Bool &msg);
   void robotPositionCallback(const geometry_msgs::PoseStamped &msg);
@@ -91,7 +93,6 @@ private:
 
   bool readTextfile();
   bool writeTextfile(Obstacle *newObstacle);
-
 
 
   /* ROS Objects
@@ -158,7 +159,7 @@ private:
 
   std::vector<Obstacle> ObstacleList_;
 
-  Obstacle new_obstacle_global_;
+  Obstacle new_obstacle_global_[3];
   ras_group8_brain::Vision new_obstacle_msg_;
 
   //Arm
@@ -167,6 +168,7 @@ private:
 
   //Obstacle
   double obstacle_position_accurancy_;
+  double obstacle_detection_accurancy_;
   int value_group1_;
   int value_group2_;
   int value_group3_;
