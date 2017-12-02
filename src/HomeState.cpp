@@ -15,7 +15,7 @@ int  Brain::homeState()
     {
         ObstacleList_[picked_up_element_].recovered=true;
     }
-    picked_up_element_=0;
+    picked_up_element_=-1;
     state_=2;
     return true;
 }

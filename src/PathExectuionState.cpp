@@ -67,6 +67,10 @@ void Brain::robotPositionCallback(const geometry_msgs::PoseStamped &msg)
     {
         home_=true;
     }
+    else
+    {
+        home_=false;
+    }
 
 
 }

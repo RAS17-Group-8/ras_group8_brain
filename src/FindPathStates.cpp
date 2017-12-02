@@ -10,6 +10,7 @@ bool Brain::findPathState()
     ROS_INFO("Find Path State");
     if(picked_up_element_>=0)
     {
+        ROS_INFO("FindPathStates:Find home path");
         if(!findHomePath())
         {
             state_=1;
@@ -17,7 +18,8 @@ bool Brain::findPathState()
         }
     }
     else
-    {       
+    {
+        ROS_INFO("FindPathStates:Find obstacle");
         if(!findElementPath())
         {
             state_=1;
@@ -138,19 +140,21 @@ bool Brain::findElementPath()
             if(!get_path_client_.call(path))
             {
                 ROS_ERROR("FindPathState: Not abele to compute Path");
-                return false;
             }
-            double time_factor=(round_time_-(ros::Time::now()-run_time_).toSec())/(2*round_time_)+0.5;
-            actual_gain=ObstacleList_[i].value-round(path.response.plan.header.seq/time_factor);
-
-            if(actual_gain>last_gain)
+            else
             {
-                actual_path_=path.response.plan;
-                last_gain=actual_gain;
-                planned_element_=i;
+                double time_factor=(round_time_-(ros::Time::now()-run_time_).toSec())/(2*round_time_)+0.5;
+                actual_gain=ObstacleList_[i].value-round(path.response.plan.header.seq/time_factor);
+
+                if(actual_gain>last_gain)
+                {
+                    actual_path_=path.response.plan;
+                    last_gain=actual_gain;
+                    planned_element_=i;
+                }
+                ROS_INFO("PathCost %i Time factor %f",actual_gain,time_factor);
+                find_path=true;
             }
-            ROS_INFO("PathCost %i Time factor %f",actual_gain,time_factor);
-            find_path=true;
         }
     }
     if(find_path)

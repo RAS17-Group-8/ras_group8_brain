@@ -6,4 +6,6 @@
     <rosparam command="load" file="$(find ras_group8_brain)/config/default.yaml" />
   </node>
 
+  <node pkg="ras_espeak" type="espeak_node" name="ras_espeak" output="screen"/>
+
 </launch>

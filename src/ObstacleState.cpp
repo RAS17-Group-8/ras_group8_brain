@@ -15,14 +15,6 @@ bool  Brain::obstacleState()
     for (int i=0;i<3;i++)
     {
 
-
-        //////////////////////////////////////Change message in global position////////////////
-        new_obstacle_global_[i].position.x=0.8;  //change to message
-        new_obstacle_global_[i].position.y=1.6;   //change to message
-        new_obstacle_global_[i].number=new_obstacle_msg_.number[i];
-        ///////////////////////////////////////////////////////////////////////////////////////
-
-
         if(new_obstacle_global_[i].number>0 && new_obstacle_global_[i].number<=14) //valuable obstacle
         {
 
@@ -185,20 +177,30 @@ void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
         obstacle_=true;
         new_obstacle_msg_=msg;
 
+
         for (int i=0;i<3;i++)
         {
+            ROS_INFO("ObstacleMesage1 %s",msg.position[i].header.frame_id.c_str());
+            ROS_INFO("Vision Message x:%f y:%f z:%f",msg.position[i].point.x,msg.position[i].point.y,msg.position[i].point.z);
 
             geometry_msgs::PointStamped obstacle_robot_frame=new_obstacle_msg_.position[i];
             geometry_msgs::PointStamped obstacle_position_global;
 
             try{
-                tf_listener_.transformPoint("/map",obstacle_robot_frame,obstacle_position_global);
+                tf_listener_.transformPoint("/robot",obstacle_robot_frame,obstacle_position_global);
 
             }
             catch(tf::TransformException ex){
                 ROS_ERROR("Transformation:%s",ex.what());
             }
+
+
             new_obstacle_global_[i].position=obstacle_position_global.point;
+
+            //////////////////////
+//                    obstacle_position_global.point.x=0.8;  //change to message
+//                    obstacle_position_global.point.y=1.6;   //change to message
+            /////////////////////
             new_obstacle_global_[i].number=new_obstacle_msg_.number[i];
         }
     }
@@ -206,10 +208,16 @@ void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
     {
         obstacle_=false;
     }
+        ROS_INFO("ObstacleMesage2");
 }
 
 bool Brain::driveToObstacle(int msg_num)
 {
+    if(new_obstacle_msg_.position[msg_num].point.x <obstacle_detection_accurancy_&&new_obstacle_msg_.position[msg_num].point.y < obstacle_detection_accurancy_)
+    {
+        ROS_INFO("ObstacleState:Near to the obstalce");
+        return true;
+    }
     double orientation_obst=atan2(new_obstacle_msg_.position[msg_num].point.x,new_obstacle_msg_.position[msg_num].point.y); //Obstacle
 
     double siny=2*actual_robot_position_.orientation.w*actual_robot_position_.orientation.z;
