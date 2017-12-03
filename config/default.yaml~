@@ -3,7 +3,7 @@ get_path_service: /ras_group8_global_planner/get_path
 
 #MoveArm
 move_arm_up_service: /ras_group8_arm/cartesian_up
-move_arm_down_service: /ras_group8_arm/cartesian_up
+move_arm_down_service: /ras_group8_arm/cartesian_down
 
 #Spearker
 speaker_topic: /espeak/string
@@ -13,6 +13,8 @@ send_path_topic: /ras_group8_brain/send_path
 path_stop_topic: /ras_group8_brain/stop_driving
 path_done_topic: /ras_group8_navigation_system/path_done
 robot_position_topic: /ras_group8_navigation_system/robot_position
+new_map_topic:  /ras_map/new_wall
+add_object_map: /ras_group8_brain/add_object_map
 
 #ObstacleDetection
 vision_msg_topic: /Object_detection
@@ -33,8 +35,8 @@ obstacle:
 
 home:
     obstacle_x: 0.0
-    obstacle_y: 0.1
-    obstacle_z: 0.05
+    obstacle_y: 0.16
+    obstacle_z: -0.1
     
     position_x: 0.15
     position_y: 0.15

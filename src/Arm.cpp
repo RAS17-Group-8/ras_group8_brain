@@ -5,7 +5,7 @@
 #include <time.h>
 namespace ras_group8_brain {
 
-bool  Brain::pickUpArm(int msg_num)
+bool  Brain::pickUpArm(int msg_num,int obs_num)
 {
     ras_group8_arm_controller::MoveArm arm_msg;
     geometry_msgs::Point arm_position;
@@ -39,12 +39,13 @@ bool  Brain::pickUpArm(int msg_num)
         if(!move_arm_up_client_.call(arm_msg))
         {
            ROS_ERROR("PickUpState: Movement was not possible");
-           return false;
+           //return false;
         }
         ros::spinOnce();
 
-        if(!obstacle_) //obstacle lift up
+        if(new_obstacle_msg_.number[msg_num]!=obs_num) //obstacle lift up
         {
+            ROS_ERROR("I picked up an obstacle");
             return true;
         }
     }
@@ -59,7 +60,7 @@ bool  Brain::putDownArm(geometry_msgs::Point position)
     arm_msg.request.position.y=100*position.y;
     arm_msg.request.position.z=100*position.z;
 
-    if(!move_arm_up_client_.call(arm_msg))
+    if(!move_arm_down_client_.call(arm_msg))
     {
         ROS_ERROR("PutDownState: Get no Service Response");
         return false;

@@ -22,6 +22,10 @@ void Brain::pathExectuionState()
        stop.data=true;
        path_stop_publisher_.publish(stop);
    }
+   else if(path_done_&&picked_up_element_>=0)
+   {
+       state_=2;
+   }
    else if(path_done_&&planned_element_>=0) //////////////think what happens if the robot is not able to find its goal
    {
        // robot turn a bit move a bit
@@ -32,6 +36,7 @@ void Brain::pathExectuionState()
            state_=2;
        }
    }
+
    else if(round1_&&!go_home_&&(round_time_-(ros::Time::now()-run_time_).toSec())<60)
    {
       go_home_=true;
@@ -47,12 +52,20 @@ void Brain::pathExectuionState()
        }
        state_=1;
    }
+   else if(path_done_)
+   {
+       state_=2;
+   }
 }
 
 
 void Brain::pathDoneCallback(const std_msgs::Bool &msg)
 {
-    path_done_=msg.data;
+    if(msg.data)
+    {
+        path_done_=true;
+    }
+
     //ROS_INFO("Path_Message");
 
 }
@@ -63,7 +76,7 @@ void Brain::robotPositionCallback(const geometry_msgs::PoseStamped &msg)
 
     double dif_pose_x=std::abs(actual_robot_position_.position.x-robot_home_position_.position.x);
     double dif_pose_y=std::abs(actual_robot_position_.position.y-robot_home_position_.position.y); /////////////////Check the orientation
-    if(dif_pose_x<home_accurancy_,dif_pose_y<home_accurancy_)
+    if(dif_pose_x<home_accurancy_&&dif_pose_y<home_accurancy_)
     {
         home_=true;
     }
@@ -75,4 +88,13 @@ void Brain::robotPositionCallback(const geometry_msgs::PoseStamped &msg)
 
 }
 
+void Brain::newMapCallback(const std_msgs::Bool &msg)
+{
+    if (msg.data)
+    {
+        path_done_=true;
+
+    }
+
+}
 } /* namespace */

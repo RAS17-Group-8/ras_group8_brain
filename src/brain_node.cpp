@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 
   ros::Time start_time_spin;
   ros::Time end_time_spin;
-  ros::Duration sleep_time(1);
+  ros::Duration sleep_time(0.5);
   ros::Duration diff_time_spin;
 
   while (ros::ok())

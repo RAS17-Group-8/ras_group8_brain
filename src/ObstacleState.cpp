@@ -15,7 +15,7 @@ bool  Brain::obstacleState()
     for (int i=0;i<3;i++)
     {
 
-        if(new_obstacle_global_[i].number>0 && new_obstacle_global_[i].number<=14) //valuable obstacle
+        if(new_obstacle_global_[i].number>0 && new_obstacle_global_[i].number<=15) //valuable obstacle
         {
 
             if (!Brain::driveToObstacle(i))
@@ -27,6 +27,7 @@ bool  Brain::obstacleState()
             stop.data=true;
             path_stop_publisher_.publish(stop);
 
+             state_=3;
 
             if (!Brain::ValuableObstacle(&new_obstacle_global_[i],i))
             {
@@ -35,15 +36,14 @@ bool  Brain::obstacleState()
 
             /////////////Send old path again//////////////////
             /////////////how do we extract finished points///////////////
-            actual_path_.header.stamp=ros::Time::now();
-            send_path_publisher_.publish(actual_path_);
-
+            //actual_path_.header.stamp=ros::Time::now();
+            //send_path_publisher_.publish(actual_path_);
 
             ///////////////////////////////////////////
 
-            state_=3;
+
         }
-        else if (new_obstacle_global_[i].number==15) //Solide obstacle
+        else if (new_obstacle_global_[i].number==16) //Solide obstacle
         {
             if (!Brain::SolidObstacle(&new_obstacle_global_[i]))
                 return false;
@@ -57,7 +57,7 @@ bool  Brain::obstacleState()
             }
 
         }
-        else if(new_obstacle_global_[i].number==16) //removable obstacle
+        else if(new_obstacle_global_[i].number==17) //removable obstacle
         {
             if (!Brain::RemovableObstacle(i))
                 return false;
@@ -77,7 +77,6 @@ bool  Brain::obstacleState()
 bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_num)
 {
     int list_element;
-    bool pickup=true;
 
     if(Brain::addObstacleToList(obstacle_global, &list_element))
     {
@@ -90,16 +89,34 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_nu
 
     if(list_element==planned_element_)
     {
-        if(!pickUpArm(msg_num))
+        if(!pickUpArm(msg_num,planned_element_))
             return false;
 
         picked_up_element_=planned_element_;
         planned_element_=-1;
+        path_done_=true;
     }
-    if (list_element=!planned_element_||pickup==false)
+    else
     {
-        //continue to drive
+//        visualization_msgs::MarkerArray new_object;
+//        new_object.
+//        add_object_publisher_.publish(new_object);
+        ////////
+        /// Add obstacle to the map and replan
+        ///
+        /////////////Send old path again//////////////////
+        /////////////how do we extract finished points///////////////
+        //actual_path_.header.stamp=ros::Time::now();
+        //send_path_publisher_.publish(actual_path_);
+
+
+        ///////////////////////////////////////////
     }
+    ////////////////////////////////
+//    if (list_element=!planned_element_||pickup==false)
+//    {
+//        //continue to drive
+//    }
     return true;
 
 }
@@ -122,6 +139,14 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
             ObstacleList_[i].recovered=false;
             ObstacleList_[i].try_counter=0;
             ROS_INFO("ObstacleState: Element Exists %d ",i);
+            if(picked_up_element_==i)
+            {
+                picked_up_element_=-1;
+                path_done_=true;
+                ROS_INFO("Delet Pickup Elment");
+            }
+
+
             return false;
         }
     }
@@ -142,8 +167,10 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
 
 bool Brain::RemovableObstacle(int msg_num)
 {
-    if(!pickUpArm(msg_num))
-        return false;
+
+    ////Drive forward
+//    if(!pickUpArm(msg_num))
+//        return false;
     ///////////////////Turn around//////////////////////////
 //    nav_msgs::Path path;
 //    path.poses.resize(1);
@@ -153,8 +180,8 @@ bool Brain::RemovableObstacle(int msg_num)
 //    path.header.frame_id="/map";
 //    send_path_publisher_.publish(path);
     ////////////////////////
-    if(!putDownArm(home_obstacle_pos_))
-        return false;
+//    if(!putDownArm(home_obstacle_pos_))
+//        return false;
 
     //Robo Back
 
@@ -166,6 +193,7 @@ bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
 
     /////////////////////
     ///add to map
+    /// replan
     /// ////////////////////////
     return true;
 }
@@ -198,8 +226,8 @@ void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
             new_obstacle_global_[i].position=obstacle_position_global.point;
 
             //////////////////////
-//                    obstacle_position_global.point.x=0.8;  //change to message
-//                    obstacle_position_global.point.y=1.6;   //change to message
+                   obstacle_position_global.point.x=0.8;  //change to message
+                   obstacle_position_global.point.y=1.6;   //change to message
             /////////////////////
             new_obstacle_global_[i].number=new_obstacle_msg_.number[i];
         }

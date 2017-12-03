@@ -8,6 +8,7 @@ namespace ras_group8_brain {
 bool Brain::findPathState()
 {
     ROS_INFO("Find Path State");
+    path_done_=false;
     if(picked_up_element_>=0)
     {
         ROS_INFO("FindPathStates:Find home path");
@@ -37,6 +38,7 @@ bool Brain::findPathState()
 bool Brain::explorState()
 {
     ROS_INFO("Explore State");
+    path_done_=false;
     //findGoalPath();
     if(!findEdges())
     {

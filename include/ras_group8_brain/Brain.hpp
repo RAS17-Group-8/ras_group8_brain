@@ -14,6 +14,7 @@
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
 #include "ras_group8_brain/Vision.h"
 
@@ -73,7 +74,7 @@ private:
   bool findEdges();
   void goalMessageCallback(const geometry_msgs::PoseStamped &msg);
 
-  bool pickUpArm(int msg_num);
+  bool pickUpArm(int msg_num, int obs_num);
   bool putDownArm(geometry_msgs::Point position);
 
   bool readParameters();
@@ -91,6 +92,8 @@ private:
   bool pathVizualisation(nav_msgs::Path *path);
   bool pointVizualisation(geometry_msgs::Point point);
 
+  void newMapCallback(const std_msgs::Bool &msg);
+
   bool readTextfile();
   bool writeTextfile(Obstacle *newObstacle);
 
@@ -107,11 +110,13 @@ private:
   ros::Publisher send_path_publisher_;
   ros::Publisher marker_publisher_;
   ros::Publisher path_stop_publisher_;
+  ros::Publisher add_object_publisher_;
 
   ros::Subscriber path_done_subscriber_;
   ros::Subscriber vision_msg_subscriber_;
   ros::Subscriber set_goal_subscriber_;
   ros::Subscriber robot_position_subscriber_;
+  ros::Subscriber new_map_subscriber_;
 
   tf::TransformListener tf_listener_;
 
@@ -127,6 +132,8 @@ private:
   std::string path_done_topic_;
   std::string vision_msg_topic_;
   std::string robot_position_topic_;
+  std::string new_map_topic_;
+  std::string add_object_map_topic_;
 
   std::string obstacle_file_;
 
@@ -176,7 +183,7 @@ private:
   int obstacle_try_;
 
 
-  ObstacleDefinition possible_obstacle_[17];
+  ObstacleDefinition possible_obstacle_[18];
 
   //home
   geometry_msgs::Point home_obstacle_pos_;

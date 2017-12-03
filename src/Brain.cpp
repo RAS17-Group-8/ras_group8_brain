@@ -26,34 +26,38 @@ Brain::Brain(ros::NodeHandle& node_handle)
   send_path_publisher_=node_handle_.advertise<nav_msgs::Path>(send_path_topic_,1,true);
   path_stop_publisher_=node_handle_.advertise<std_msgs::Bool>(path_stop_topic_,1,true);
   marker_publisher_ = node_handle_.advertise<visualization_msgs::Marker>("visualisation_marker", 1,true);
+  add_object_publisher_= node_handle_.advertise<visualization_msgs::MarkerArray>(add_object_map_topic_, 1,true);
 
   //Subscriber
   path_done_subscriber_=node_handle_.subscribe(path_done_topic_,1,&Brain::pathDoneCallback, this);
   robot_position_subscriber_=node_handle_.subscribe(robot_position_topic_,1,&Brain::robotPositionCallback, this);
   vision_msg_subscriber_=node_handle_.subscribe(vision_msg_topic_,1,&Brain::visionMessageCallback, this);
   set_goal_subscriber_=node_handle_.subscribe("/move_base_simple/goal",1,&Brain::goalMessageCallback, this);
+  new_map_subscriber_=node_handle_.subscribe(new_map_topic_,1,&Brain::newMapCallback, this);
+
 
   state_=0;
 
   ROS_INFO("Successfully launched node.");
 
   possible_obstacle_[0].name="no obstacle";   possible_obstacle_[0].value=0;
-  possible_obstacle_[1].name="green cube";   possible_obstacle_[1].value=value_group1_;
-  possible_obstacle_[2].name="blue cube";   possible_obstacle_[2].value=value_group1_;
-  possible_obstacle_[3].name="yellow cube";   possible_obstacle_[3].value=value_group1_;
-  possible_obstacle_[4].name="red hollow cube";   possible_obstacle_[4].value=value_group2_;
-  possible_obstacle_[5].name="green hollow cube";   possible_obstacle_[5].value=value_group2_;
-  possible_obstacle_[6].name="red sphere";   possible_obstacle_[6].value=value_group2_;
-  possible_obstacle_[7].name="yellow sphere";   possible_obstacle_[7].value=value_group3_;
-  possible_obstacle_[8].name="blue hollow triangle";   possible_obstacle_[8].value=value_group3_;
-  possible_obstacle_[9].name="red hollow cylinder";   possible_obstacle_[9].value=value_group3_;
-  possible_obstacle_[10].name="green hollow cylinder";   possible_obstacle_[10].value=value_group4_;
-  possible_obstacle_[11].name="purple hollow cross";   possible_obstacle_[11].value=value_group4_;
-  possible_obstacle_[12].name="orange hollow cross";   possible_obstacle_[12].value=value_group4_;
-  possible_obstacle_[13].name="orange star";   possible_obstacle_[13].value=value_group4_;
-  possible_obstacle_[14].name="purple star";   possible_obstacle_[14].value=value_group4_;
-  possible_obstacle_[15].name="solide obstacle";   possible_obstacle_[15].value=0;
-  possible_obstacle_[16].name="removable obstacle";   possible_obstacle_[16].value=0;
+  possible_obstacle_[1].name="Red Cube";   possible_obstacle_[1].value=value_group1_;
+  possible_obstacle_[2].name="Red Hollow Cube";   possible_obstacle_[2].value=value_group1_;
+  possible_obstacle_[3].name="Red Ball";   possible_obstacle_[3].value=value_group1_;
+  possible_obstacle_[4].name="Red Hollow Cylinder";   possible_obstacle_[4].value=value_group2_;
+  possible_obstacle_[5].name="Green Cube";   possible_obstacle_[5].value=value_group2_;
+  possible_obstacle_[6].name="Green Hollow Cube";   possible_obstacle_[6].value=value_group2_;
+  possible_obstacle_[7].name="Green Hollow Cylinder";   possible_obstacle_[7].value=value_group3_;
+  possible_obstacle_[8].name="Yellow Cube";   possible_obstacle_[8].value=value_group3_;
+  possible_obstacle_[9].name="Yellow Ball";   possible_obstacle_[9].value=value_group3_;
+  possible_obstacle_[10].name="Blue Cube";   possible_obstacle_[10].value=value_group4_;
+  possible_obstacle_[11].name="Blue Hollow Triagnle";   possible_obstacle_[11].value=value_group4_;
+  possible_obstacle_[12].name="Purple Cross";   possible_obstacle_[12].value=value_group4_;
+  possible_obstacle_[13].name="Purple Star";   possible_obstacle_[13].value=value_group4_;
+  possible_obstacle_[14].name="Orange Cross";   possible_obstacle_[14].value=value_group4_;
+  possible_obstacle_[15].name="Orange Star";   possible_obstacle_[15].value=value_group4_;
+  possible_obstacle_[16].name="SolideObstacle";   possible_obstacle_[16].value=0;
+   possible_obstacle_[17].name="Trab";   possible_obstacle_[17].value=0;
 
   edges_[0].point.x=maze_size_x_-0.15; edges_[0].point.y=0.15; edges_[0].explored=false;
   edges_[1].point.x=maze_size_x_-0.15; edges_[1].point.y=maze_size_y_-0.15; edges_[1].explored=false;
@@ -83,6 +87,10 @@ bool Brain::readParameters()
   if (!node_handle_.getParam("vision_msg_topic", vision_msg_topic_))
     return false;
   if (!node_handle_.getParam("robot_position_topic", robot_position_topic_))
+    return false;
+  if (!node_handle_.getParam("new_map_topic", new_map_topic_))
+    return false;
+  if (!node_handle_.getParam("add_object_map_topic", add_object_map_topic_))
     return false;
   if (!node_handle_.getParam("arm_up/pickup_attempt", pickup_attempt_))
     return false;
