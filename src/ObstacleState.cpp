@@ -27,20 +27,20 @@ bool  Brain::obstacleState()
             stop.data=true;
             path_stop_publisher_.publish(stop);
 
-             state_=3;
-
             if (!Brain::ValuableObstacle(&new_obstacle_global_[i],i))
             {
-                return false;
+                //return false;
             }
 
-            /////////////Send old path again//////////////////
-            /////////////how do we extract finished points///////////////
-            //actual_path_.header.stamp=ros::Time::now();
-            //send_path_publisher_.publish(actual_path_);
 
-            ///////////////////////////////////////////
-
+            if(round1_)
+            {
+                state_=1;
+            }
+            else
+            {
+                state_=2;
+            }
 
         }
         else if (new_obstacle_global_[i].number==16) //Solide obstacle
@@ -59,9 +59,17 @@ bool  Brain::obstacleState()
         }
         else if(new_obstacle_global_[i].number==17) //removable obstacle
         {
-            if (!Brain::RemovableObstacle(i))
+            if (!Brain::RemovableObstacle(&new_obstacle_global_[i]))
                 return false;
-            state_=3;
+
+            if(round1_)
+            {
+                state_=1;
+            }
+            else
+            {
+                state_=2;
+            }
         }
         else
         {
@@ -94,29 +102,9 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_nu
 
         picked_up_element_=planned_element_;
         planned_element_=-1;
-        path_done_=true;
-    }
-    else
-    {
-//        visualization_msgs::MarkerArray new_object;
-//        new_object.
-//        add_object_publisher_.publish(new_object);
-        ////////
-        /// Add obstacle to the map and replan
-        ///
-        /////////////Send old path again//////////////////
-        /////////////how do we extract finished points///////////////
-        //actual_path_.header.stamp=ros::Time::now();
-        //send_path_publisher_.publish(actual_path_);
 
-
-        ///////////////////////////////////////////
     }
-    ////////////////////////////////
-//    if (list_element=!planned_element_||pickup==false)
-//    {
-//        //continue to drive
-//    }
+    //path_done_=true;
     return true;
 
 }
@@ -161,11 +149,23 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
     ObstacleList_.push_back(*obstacle);
     Brain::writeTextfile(obstacle);
     pointVizualisation(obstacle->position);
+
+    ////////////Add to the map/////////////////////
+    visualization_msgs::MarkerArray new_marker;
+    new_marker.markers.resize(1);
+    new_marker.markers[0].header.frame_id="/map";
+    new_marker.markers[0].header.stamp=ros::Time::now();
+    new_marker.markers[0].type=2;
+    new_marker.markers[0].pose.position=obstacle->position;
+    new_marker.markers[0].scale.x=0.04;
+    add_object_publisher_.publish(new_marker);
+    ///////////////////////////////////////////////////
+
     return true;
 }
 
 
-bool Brain::RemovableObstacle(int msg_num)
+bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
 {
 
     ////Drive forward
@@ -185,16 +185,35 @@ bool Brain::RemovableObstacle(int msg_num)
 
     //Robo Back
 
+
+    ////////////Add to the map/////////////////////
+    visualization_msgs::MarkerArray new_marker;
+    new_marker.markers.resize(1);
+    new_marker.markers[0].header.frame_id="/map";
+    new_marker.markers[0].header.stamp=ros::Time::now();
+    new_marker.markers[0].type=2;
+    new_marker.markers[0].pose.position=obstacle->position;
+    new_marker.markers[0].scale.x=0.08;
+    add_object_publisher_.publish(new_marker);
+    ///////////////////////////////////////////////////
+
     return true;
 }
 
 bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
 {
 
-    /////////////////////
-    ///add to map
-    /// replan
-    /// ////////////////////////
+    ////////////Add to the map/////////////////////
+    visualization_msgs::MarkerArray new_marker;
+    new_marker.markers.resize(1);
+    new_marker.markers[0].header.frame_id="/map";
+    new_marker.markers[0].header.stamp=ros::Time::now();
+    new_marker.markers[0].type=2;
+    new_marker.markers[0].pose.position=obstacle->position;
+    new_marker.markers[0].scale.x=0.10;
+    add_object_publisher_.publish(new_marker);
+    ///////////////////////////////////////////////////
+
     return true;
 }
 
@@ -246,25 +265,33 @@ bool Brain::driveToObstacle(int msg_num)
         ROS_INFO("ObstacleState:Near to the obstalce");
         return true;
     }
-    double orientation_obst=atan2(new_obstacle_msg_.position[msg_num].point.x,new_obstacle_msg_.position[msg_num].point.y); //Obstacle
+//    double orientation_obst=atan2(new_obstacle_msg_.position[msg_num].point.x,new_obstacle_msg_.position[msg_num].point.y); //Obstacle
 
-    double siny=2*actual_robot_position_.orientation.w*actual_robot_position_.orientation.z;
-    double cosy=1-2*actual_robot_position_.orientation.z*actual_robot_position_.orientation.z;
-    double orientation=atan2(siny,cosy)+orientation_obst;
+//    double siny=2*actual_robot_position_.orientation.w*actual_robot_position_.orientation.z;
+//    double cosy=1-2*actual_robot_position_.orientation.z*actual_robot_position_.orientation.z;
+//    double orientation=atan2(siny,cosy)+orientation_obst;
 
-    geometry_msgs::Quaternion new_orientation;
-    new_orientation.z=sin(0.5*orientation);
-    new_orientation.w=cos(0.5*orientation);
+//    geometry_msgs::Quaternion new_orientation;
+//    new_orientation.z=sin(0.5*orientation);
+//    new_orientation.w=cos(0.5*orientation);
+
+//    nav_msgs::Path path;
+//    path.poses.resize(1);
+//    path.poses[0].pose.position.x=new_obstacle_global_[msg_num].position.x-cos(orientation)*obstacle_detection_accurancy_;
+//    path.poses[0].pose.position.y=new_obstacle_global_[msg_num].position.y-sin(orientation)*obstacle_detection_accurancy_;
+//    path.poses[0].pose.orientation=new_orientation;
+//    path.header.stamp=ros::Time::now();
+//    path.header.frame_id="/map";
+//    send_path_publisher_.publish(path);
+
 
     nav_msgs::Path path;
     path.poses.resize(1);
-    path.poses[0].pose.position.x=new_obstacle_global_[msg_num].position.x-cos(orientation)*obstacle_detection_accurancy_;
-    path.poses[0].pose.position.y=new_obstacle_global_[msg_num].position.y-sin(orientation)*obstacle_detection_accurancy_;
-    path.poses[0].pose.orientation=new_orientation;
+    path.poses[0].pose.position.x=new_obstacle_msg_.position[msg_num].point.x ;
+    path.poses[0].pose.position.y=new_obstacle_msg_.position[msg_num].point.y ;
     path.header.stamp=ros::Time::now();
     path.header.frame_id="/map";
     send_path_publisher_.publish(path);
-
 
     ros::Duration wait_time(0.5);
 
@@ -272,7 +299,7 @@ bool Brain::driveToObstacle(int msg_num)
     for (int i=0; i<6;i++)
     {
         ROS_INFO("Wait for driving");
-        if(path_done_)
+        if(new_obstacle_msg_.position[msg_num].point.x <obstacle_detection_accurancy_&&new_obstacle_msg_.position[msg_num].point.y < obstacle_detection_accurancy_)
         {
             return true;
         }

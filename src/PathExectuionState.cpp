@@ -22,11 +22,7 @@ void Brain::pathExectuionState()
        stop.data=true;
        path_stop_publisher_.publish(stop);
    }
-   else if(path_done_&&picked_up_element_>=0)
-   {
-       state_=2;
-   }
-   else if(path_done_&&planned_element_>=0) //////////////think what happens if the robot is not able to find its goal
+   else if(path_done_&&planned_element_>=0&&picked_up_element_-1) //////////////think what happens if the robot is not able to find its goal
    {
        // robot turn a bit move a bit
        ros::spinOnce();

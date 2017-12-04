@@ -81,7 +81,7 @@ private:
   bool Speak(std_msgs::String msg);
 
   bool ValuableObstacle(struct Obstacle *obstacle_global, int msg_num);
-  bool RemovableObstacle(int msg_num);
+  bool RemovableObstacle(struct Obstacle *obstacle);
   bool SolidObstacle(struct Obstacle *obstacle);
   bool addObstacleToList(struct Obstacle *obstacle, int* list_element);
   bool driveToObstacle(int msg_num);
