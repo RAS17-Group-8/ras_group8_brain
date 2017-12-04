@@ -66,9 +66,9 @@ void Brain::pathDoneCallback(const std_msgs::Bool &msg)
 
 }
 
-void Brain::robotPositionCallback(const geometry_msgs::PoseStamped &msg)
+void Brain::robotPositionCallback(const nav_msgs::Odometry &msg)
 {
-    actual_robot_position_=msg.pose;
+    actual_robot_position_=msg.pose.pose;
 
     double dif_pose_x=std::abs(actual_robot_position_.position.x-robot_home_position_.position.x);
     double dif_pose_y=std::abs(actual_robot_position_.position.y-robot_home_position_.position.y); /////////////////Check the orientation

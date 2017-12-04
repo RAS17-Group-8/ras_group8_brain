@@ -143,7 +143,7 @@ bool Brain::readParameters()
 void Brain::stateMachine()
 {
   ros::spinOnce();
-  ROS_INFO("State: %d, NumObstacles %i, Home %d, Obstcle:%d, GoHOme:%d", state_, ObstacleList_.size(),home_,obstacle_,go_home_);
+  ROS_INFO("State: %d, NumObstacles %lu, Home %d, Obstcle:%d, GoHOme:%d", state_, ObstacleList_.size(),home_,obstacle_,go_home_);
   ROS_INFO("PlanElement: %i, PickUu_ELE: %i, pathdone: %d Round1:%d", planned_element_,picked_up_element_, path_done_,round1_);
   ros::Duration act_time=ros::Time::now()-run_time_;
   ROS_INFO("Time: %f",act_time.toSec());

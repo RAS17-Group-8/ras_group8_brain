@@ -7,6 +7,7 @@
 
 #include <geometry_msgs/Point.h>
 #include <nav_msgs/GetPlan.h>
+#include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
@@ -87,7 +88,7 @@ private:
   bool driveToObstacle(int msg_num);
 
   void pathDoneCallback(const std_msgs::Bool &msg);
-  void robotPositionCallback(const geometry_msgs::PoseStamped &msg);
+  void robotPositionCallback(const nav_msgs::Odometry &msg);
   void visionMessageCallback(const ras_group8_brain::Vision &msg);
   bool pathVizualisation(nav_msgs::Path *path);
   bool pointVizualisation(geometry_msgs::Point point);
