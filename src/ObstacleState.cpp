@@ -150,6 +150,8 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
     Brain::writeTextfile(obstacle);
     pointVizualisation(obstacle->position);
 
+    system("roslaunch vision evidance.launch");
+
     ////////////Add to the map/////////////////////
     visualization_msgs::MarkerArray new_marker;
     new_marker.markers.resize(1);
@@ -219,14 +221,13 @@ bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
 
 void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
 {
-    if (msg.number[0]!=0)
+    new_obstacle_msg_=msg;
+    obstacle_=false;
+    for (int i=0;i<3;i++)
     {
-        obstacle_=true;
-        new_obstacle_msg_=msg;
-
-
-        for (int i=0;i<3;i++)
+        if (msg.number[i]!=0)
         {
+            obstacle_=true;
             ROS_INFO("ObstacleMesage1 %s",msg.position[i].header.frame_id.c_str());
             ROS_INFO("Vision Message x:%f y:%f z:%f",msg.position[i].point.x,msg.position[i].point.y,msg.position[i].point.z);
 
@@ -251,11 +252,6 @@ void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
             new_obstacle_global_[i].number=new_obstacle_msg_.number[i];
         }
     }
-    else
-    {
-        obstacle_=false;
-    }
-        ROS_INFO("ObstacleMesage2");
 }
 
 bool Brain::driveToObstacle(int msg_num)
