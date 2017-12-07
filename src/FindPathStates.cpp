@@ -39,11 +39,22 @@ bool Brain::explorState()
 {
     ROS_INFO("Explore State");
     path_done_=false;
-    //findGoalPath();
-    if(!findEdges())
+    findGoalPath();
+    if (!recieved_pose_)
     {
-        return false;
+        if(!findEdges())
+        {
+            return false;
+        }
+
     }
+    else
+    {
+        recieved_pose_=false;
+        findGoalPath();
+
+    }
+
     state_=3;
     pathVizualisation(&actual_path_);
     actual_path_.header.stamp=ros::Time::now();
@@ -211,6 +222,7 @@ void Brain::goalMessageCallback(const geometry_msgs::PoseStamped &msg)
     ROS_INFO("FindPathState: Recive a goal");
 
     robot_goal_rviz_=msg.pose;
+    recieved_pose_=true;
 
 }
 

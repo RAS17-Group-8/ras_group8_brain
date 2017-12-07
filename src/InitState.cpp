@@ -5,16 +5,11 @@
 
 namespace ras_group8_brain {
 
-
 bool  Brain::initState()
 {
     //////////////////Only for Testing//////////////////////
-
-     actual_robot_position_.position.x=0.15;
-     actual_robot_position_.position.y=0.15;
-
-     robot_goal_rviz_=actual_robot_position_;
-
+     actual_robot_position_.position.x=0.2;
+     actual_robot_position_.position.y=0.14;
     ////////////////////////////////////////////////////////////
 
    ROS_INFO("Init State");
@@ -25,6 +20,7 @@ bool  Brain::initState()
    obstacle_=false;
    home_=false;
    go_home_=false;
+   recieved_pose_=false;
 
    std_msgs::String greeting;
    greeting.data="Hello I'm a robot";
@@ -33,10 +29,8 @@ bool  Brain::initState()
    if(!Brain::readTextfile())
    {
        ROS_ERROR("InitState: Not possible to read obstacle file");
-       ////////////ADD a new state variable///////////////
    }
 
- //Change state
    if (round1_)
    {
        state_=1;

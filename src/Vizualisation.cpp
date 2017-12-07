@@ -22,8 +22,8 @@ bool Brain::pathVizualisation(nav_msgs::Path *path)
     path_points.action=visualization_msgs::Marker::ADD;
     path_points.pose.orientation.w =1.0;
     path_points.id=1;
-    //path_points.type = visualization_msgs::Marker::POINTS;
-    path_points.type = visualization_msgs::Marker::LINE_STRIP;
+    path_points.type = visualization_msgs::Marker::POINTS;
+    //path_points.type = visualization_msgs::Marker::LINE_STRIP;
     path_points.scale.x = 0.01;
     path_points.scale.y = 0.01;
     path_points.color.b = 1.0;

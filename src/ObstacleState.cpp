@@ -29,9 +29,8 @@ bool  Brain::obstacleState()
 
             if (!Brain::ValuableObstacle(&new_obstacle_global_[i],i))
             {
-                //return false;
+                ROS_INFO("Problem with valuable obastcle");
             }
-
 
             if(round1_)
             {
@@ -86,6 +85,15 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_nu
 {
     int list_element;
 
+    //Start the Rosbag
+    char buffer[100];
+    int nevidence;
+    nevidence=sprintf(buffer, "rosrun ras_group8_lidar publish_evidence __name:=evidence %d %f %f",obstacle->number,obstacle->position.x,obstacle->position.y);
+
+    std::string evi=std::string(buffer);
+    system(evi.c_str());
+
+
     if(Brain::addObstacleToList(obstacle_global, &list_element))
     {
         pointVizualisation(obstacle_global->position);
@@ -104,7 +112,6 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_nu
         planned_element_=-1;
 
     }
-    //path_done_=true;
     return true;
 
 }
@@ -150,9 +157,7 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
     Brain::writeTextfile(obstacle);
     pointVizualisation(obstacle->position);
 
-    system("roslaunch vision evidance.launch");
-
-    ////////////Add to the map/////////////////////
+    //Add Obstacle to the map
     visualization_msgs::MarkerArray new_marker;
     new_marker.markers.resize(1);
     new_marker.markers[0].header.frame_id="/map";
@@ -161,7 +166,6 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
     new_marker.markers[0].pose.position=obstacle->position;
     new_marker.markers[0].scale.x=0.04;
     add_object_publisher_.publish(new_marker);
-    ///////////////////////////////////////////////////
 
     return true;
 }
@@ -169,8 +173,6 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
 
 bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
 {
-
-    ////Drive forward
 //    if(!pickUpArm(msg_num))
 //        return false;
     ///////////////////Turn around//////////////////////////
@@ -188,7 +190,7 @@ bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
     //Robo Back
 
 
-    ////////////Add to the map/////////////////////
+    //Add to the map
     visualization_msgs::MarkerArray new_marker;
     new_marker.markers.resize(1);
     new_marker.markers[0].header.frame_id="/map";
@@ -197,15 +199,13 @@ bool Brain::RemovableObstacle(struct Brain::Obstacle *obstacle)
     new_marker.markers[0].pose.position=obstacle->position;
     new_marker.markers[0].scale.x=0.08;
     add_object_publisher_.publish(new_marker);
-    ///////////////////////////////////////////////////
-
     return true;
 }
 
 bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
 {
 
-    ////////////Add to the map/////////////////////
+    //Add to the map
     visualization_msgs::MarkerArray new_marker;
     new_marker.markers.resize(1);
     new_marker.markers[0].header.frame_id="/map";
@@ -214,7 +214,6 @@ bool Brain::SolidObstacle(struct Brain::Obstacle *obstacle)
     new_marker.markers[0].pose.position=obstacle->position;
     new_marker.markers[0].scale.x=0.10;
     add_object_publisher_.publish(new_marker);
-    ///////////////////////////////////////////////////
 
     return true;
 }
@@ -228,26 +227,26 @@ void Brain::visionMessageCallback(const ras_group8_brain::Vision &msg)
         if (msg.number[i]!=0)
         {
             obstacle_=true;
-            ROS_INFO("ObstacleMesage1 %s",msg.position[i].header.frame_id.c_str());
-            ROS_INFO("Vision Message x:%f y:%f z:%f",msg.position[i].point.x,msg.position[i].point.y,msg.position[i].point.z);
+            //ROS_INFO("Vision Message x:%f y:%f z:%f",msg.position[i].point.x,msg.position[i].point.y,msg.position[i].point.z);
 
             geometry_msgs::PointStamped obstacle_robot_frame=new_obstacle_msg_.position[i];
             geometry_msgs::PointStamped obstacle_position_global;
 
             try{
-                tf_listener_.transformPoint("/robot",obstacle_robot_frame,obstacle_position_global);
+                tf_listener_.waitForTransform("/base_link", "/camera_depth_optical_frame",
+                              ros::Time::now(), ros::Duration(3.0));
+                tf_listener_.transformPoint("/base_link",obstacle_robot_frame,obstacle_position_global);
 
             }
             catch(tf::TransformException ex){
                 ROS_ERROR("Transformation:%s",ex.what());
             }
 
-
             new_obstacle_global_[i].position=obstacle_position_global.point;
 
-            //////////////////////
-                   obstacle_position_global.point.x=0.8;  //change to message
-                   obstacle_position_global.point.y=1.6;   //change to message
+            //////////////////////Testing
+                  // obstacle_position_global.point.x=0.8;  //change to message
+                   //obstacle_position_global.point.y=1.6;   //change to message
             /////////////////////
             new_obstacle_global_[i].number=new_obstacle_msg_.number[i];
         }

@@ -22,7 +22,7 @@ void Brain::pathExectuionState()
        stop.data=true;
        path_stop_publisher_.publish(stop);
    }
-   else if(path_done_&&planned_element_>=0&&picked_up_element_-1) //////////////think what happens if the robot is not able to find its goal
+   else if(path_done_&&planned_element_>=0&&picked_up_element_-1) //the robot is not able to find its goal
    {
        // robot turn a bit move a bit
        ros::spinOnce();
@@ -32,9 +32,8 @@ void Brain::pathExectuionState()
            state_=2;
        }
    }
-
    else if(round1_&&!go_home_&&(round_time_-(ros::Time::now()-run_time_).toSec())<60)
-   {
+   {//Time of the second run is nearly over
       go_home_=true;
       ROS_INFO("Time to go home");
       state_=2;
@@ -62,8 +61,6 @@ void Brain::pathDoneCallback(const std_msgs::Bool &msg)
         path_done_=true;
     }
 
-    //ROS_INFO("Path_Message");
-
 }
 
 void Brain::robotPositionCallback(const nav_msgs::Odometry &msg)
@@ -80,8 +77,6 @@ void Brain::robotPositionCallback(const nav_msgs::Odometry &msg)
     {
         home_=false;
     }
-
-
 }
 
 void Brain::newMapCallback(const std_msgs::Bool &msg)

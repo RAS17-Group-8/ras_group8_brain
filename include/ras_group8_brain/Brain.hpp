@@ -148,11 +148,9 @@ private:
   bool round1_;
   int picked_up_element_;
   int planned_element_;
-  int planned_edge_;
   bool path_done_;
   bool obstacle_;
   bool home_;
-  double round_time_;
   bool go_home_;
 
   //PathPlanning
@@ -160,8 +158,10 @@ private:
   geometry_msgs::Pose robot_goal_rviz_;
   geometry_msgs::Pose robot_home_position_;
   Edge edges_[3];
+  int planned_edge_;
   double maze_size_x_;
   double maze_size_y_;
+  bool recieved_pose_;
 
   nav_msgs::Path  actual_path_;
 
@@ -182,9 +182,10 @@ private:
   int value_group3_;
   int value_group4_;
   int obstacle_try_;
-
-
   ObstacleDefinition possible_obstacle_[18];
+
+  //Path Exectuion
+  double round_time_;
 
   //home
   geometry_msgs::Point home_obstacle_pos_;
