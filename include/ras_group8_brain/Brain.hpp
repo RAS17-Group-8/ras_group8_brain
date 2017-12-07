@@ -193,6 +193,8 @@ private:
 
   //Vizualistion
   visualization_msgs::Marker object_points;
+
+  std_msgs::String speaking;
 };
 
 } /* namespace */

@@ -8,6 +8,8 @@ namespace ras_group8_brain {
 bool Brain::findPathState()
 {
     ROS_INFO("Find Path State");
+    speaking.data="Find Path State";
+    Brain::Speak(speaking);
     path_done_=false;
     if(picked_up_element_>=0)
     {
@@ -38,6 +40,8 @@ bool Brain::findPathState()
 bool Brain::explorState()
 {
     ROS_INFO("Explore State");
+    speaking.data="Explor State";
+    Brain::Speak(speaking);
     path_done_=false;
     findGoalPath();
     if (!recieved_pose_)
@@ -75,7 +79,7 @@ bool Brain::findEdges()
 
     path.request.start.pose=actual_robot_position_;
 
-    for(int i=0; i<3; i++) ///////////////change to size??
+    for(int i=0; i<3; i++)
     {
         if (!edges_[i].explored)
         {

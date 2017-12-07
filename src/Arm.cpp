@@ -7,6 +7,10 @@ namespace ras_group8_brain {
 
 bool  Brain::pickUpArm(int msg_num,int obs_num)
 {
+    /*
+     * Function to pick up an obstacle which is seen by the vision system
+     * Fuction tries to catch the object through several trials.
+     */
     ras_group8_arm_controller::MoveArm arm_msg;
     geometry_msgs::Point arm_position;
 
@@ -55,6 +59,9 @@ bool  Brain::pickUpArm(int msg_num,int obs_num)
 
 bool  Brain::putDownArm(geometry_msgs::Point position)
 {
+    /*
+     * Put the obstacle down on a certain position
+     */
     ras_group8_arm_controller::MoveArm arm_msg;
     arm_msg.request.position.x=100*position.x;
     arm_msg.request.position.y=100*position.y;

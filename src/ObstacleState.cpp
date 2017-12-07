@@ -11,12 +11,16 @@ namespace ras_group8_brain {
 bool  Brain::obstacleState()
 {
     ROS_INFO("Obstacle State");
+    speaking.data="Obstacle State";
+    Brain::Speak(speaking);
 
     for (int i=0;i<3;i++)
     {
 
         if(new_obstacle_global_[i].number>0 && new_obstacle_global_[i].number<=15) //valuable obstacle
         {
+            speaking.data="Valuable obstacle";
+            Brain::Speak(speaking);
 
             if (!Brain::driveToObstacle(i))
             {
@@ -44,6 +48,9 @@ bool  Brain::obstacleState()
         }
         else if (new_obstacle_global_[i].number==16) //Solide obstacle
         {
+            speaking.data="Solide Obstacle";
+            Brain::Speak(speaking);
+
             if (!Brain::SolidObstacle(&new_obstacle_global_[i]))
                 return false;
             if(round1_)
@@ -58,6 +65,9 @@ bool  Brain::obstacleState()
         }
         else if(new_obstacle_global_[i].number==17) //removable obstacle
         {
+            speaking.data="Trap";
+            Brain::Speak(speaking);
+
             if (!Brain::RemovableObstacle(&new_obstacle_global_[i]))
                 return false;
 
@@ -88,19 +98,20 @@ bool Brain::ValuableObstacle(struct Brain::Obstacle *obstacle_global, int msg_nu
     //Start the Rosbag
     char buffer[100];
     int nevidence;
-    nevidence=sprintf(buffer, "rosrun ras_group8_lidar publish_evidence __name:=evidence %d %f %f",obstacle->number,obstacle->position.x,obstacle->position.y);
+    nevidence=sprintf(buffer, "rosrun ras_group8_lidar publish_evidence __name:=evidence %d %f %f",
+                      obstacle_global->number,obstacle_global->position.x,obstacle_global->position.y);
 
     std::string evi=std::string(buffer);
     system(evi.c_str());
 
+    std_msgs::String obstacle_text;
+    obstacle_text.data="I see the "+obstacle_global->text;
+    Brain::Speak(obstacle_text);
+    ROS_INFO("ObstacleState: %s ",obstacle_text.data.c_str());
 
     if(Brain::addObstacleToList(obstacle_global, &list_element))
     {
-        pointVizualisation(obstacle_global->position);
-        std_msgs::String obstacle_text;
-        obstacle_text.data="I see the "+obstacle_global->text;
-        Brain::Speak(obstacle_text);
-        ROS_INFO("ObstacleState: %s ",obstacle_text.data.c_str());
+        pointVizualisation(obstacle_global->position); 
     }
 
     if(list_element==planned_element_)
@@ -130,6 +141,9 @@ bool Brain::addObstacleToList(struct Brain::Obstacle *obstacle, int *list_elemen
         /////////////////////
         if(ObstacleList_[i].number==obstacle->number)
         {
+            speaking.data="I know this object already";
+            Brain::Speak(speaking);
+
             *list_element=i;
             ObstacleList_[i].recovered=false;
             ObstacleList_[i].try_counter=0;
@@ -279,11 +293,12 @@ bool Brain::driveToObstacle(int msg_num)
 //    path.header.frame_id="/map";
 //    send_path_publisher_.publish(path);
 
-
     nav_msgs::Path path;
-    path.poses.resize(1);
-    path.poses[0].pose.position.x=new_obstacle_msg_.position[msg_num].point.x ;
-    path.poses[0].pose.position.y=new_obstacle_msg_.position[msg_num].point.y ;
+    path.poses.resize(2);
+    path.poses[0].pose.position.x=actual_robot_position_.position.x ;
+    path.poses[0].pose.position.y=actual_robot_position_.position.y ;
+    path.poses[1].pose.position.x=new_obstacle_msg_.position[msg_num].point.x ;
+    path.poses[1].pose.position.y=new_obstacle_msg_.position[msg_num].point.y ;
     path.header.stamp=ros::Time::now();
     path.header.frame_id="/map";
     send_path_publisher_.publish(path);

@@ -9,6 +9,8 @@ namespace ras_group8_brain {
 int  Brain::homeState()
 {
     ROS_INFO("Home State");
+    speaking.data="Home State";
+    Brain::Speak(speaking);
     if(!putDownArm(home_obstacle_pos_))
         return false;
     if(picked_up_element_>=0 && picked_up_element_<ObstacleList_.size())
